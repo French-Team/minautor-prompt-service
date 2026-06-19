@@ -29,9 +29,9 @@
 
 ---
 
-## Corrections etameliorations (session du 19 juin 2026)
+## Corrections et améliorations (session du 19 juin 2026)
 
-Les changements ci-dessous ont ete effectues apres le commit initial pour amenuser le projet a un etat zero-defaut.
+Les changements ci-dessous ont été effectués après le commit initial pour amener le projet à un état zéro-défaut.
 
 ---
 
