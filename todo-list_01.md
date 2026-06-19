@@ -15,12 +15,12 @@
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
-| 4.1 | Supprimer `vite.optimizeDeps` | `nuxt.config.ts` | 5min | ⬜ |
-| 4.2 | Tester `npm run dev` | Terminal | 5min | ⬜ |
-| 4.3 | Tester `npm run build` | Terminal | 1min | ⬜ |
+| 4.1 | Supprimer `vite.optimizeDeps` | `nuxt.config.ts` | 5min | ✅ |
+| 4.2 | Tester `npm run dev` | Terminal | 5min | ✅ |
+| 4.3 | Tester `npm run build` | Terminal | 5min | ✅ |
 | 4.4 | Commit + push | Terminal | 5min | ⬜ |
 
-**Total OB-04 :** ~15min
+**Total OB-04 :** ~15min ✅
 
 ---
 
@@ -28,13 +28,13 @@
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
-| 1.1 | Ajouter `kill-port` en dependance dev | `package.json` | 5min | ⬜ |
-| 1.2 | Creer le script `build:clean` | `package.json` | 5min | ⬜ |
-| 1.3 | Modifier le script `build` → `build:clean` | `package.json` | 5min | ⬜ |
-| 1.4 | Modifier `validate` → `build:clean` | `package.json` | 5min | ⬜ |
-| 1.5 | Tester : `npm run validate` sans serveur | Terminal | 5min | ⬜ |
+| 1.1 | Ajouter `kill-port` en dependance dev | `package.json` | 5min | ✅ |
+| 1.2 | Creer le script `build:clean` | `package.json` | 5min | ✅ |
+| 1.3 | Modifier le script `build` → `build:clean` | `package.json` | 5min | ✅ |
+| 1.4 | Modifier `validate` → `build:clean` | `package.json` | 5min | ✅ |
+| 1.5 | Tester : `npm run validate` sans serveur | Terminal | 5min | ✅ |
 
-**Total OB-01 :** ~30min
+**Total OB-01 :** ~30min ✅
 
 ---
 
@@ -57,7 +57,7 @@
 
 | Phase | Lot | Taches | Effort total | Etat |
 |-------|-----|--------|-------------|------|
-| Phase 1 | OB-04 + OB-01 | 9 taches | ~45min | ⬜ Planifie |
+| Phase 1 | OB-04 + OB-01 | 9 taches | ~45min | ✅ Termine |
 | Phase 2 | OB-03 | 6 taches | ~2h | ⬜ Planifie |
 | **Total** | **3 lots** | **15 taches** | **~2h30-3h30** | ⬜ |
 

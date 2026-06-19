@@ -30,9 +30,6 @@ export default defineNuxtConfig({
     define: {
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     },
-    optimizeDeps: {
-      include: ['src/index.ts', 'src/config/index.ts'],
-    },
   },
 
   nitro: {
