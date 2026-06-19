@@ -33,7 +33,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    // Garde le preset par défaut; on n'utilise pas server/api pour l'instant
+    minify: true,
   },
 
   experimental: {

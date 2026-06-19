@@ -42,14 +42,14 @@
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
-| 3.1 | Analyser les chunks du build serveur | Terminal | 15min | ⬜ |
-| 3.2 | Rechercher options Nuxt/Nitro pour exclure `@babel/parser` | Documentation | 30min | ⬜ |
-| 3.3 | Appliquer la configuration si possible | `nuxt.config.ts` | 15min | ⬜ |
-| 3.4 | Tester build + e2e apres modif | Terminal | 30min | ⬜ |
-| 3.5 | Rediger le rapport de faisabilite | `docs/` | 15min | ⬜ |
-| 3.6 | Commit + push si applicable | Terminal | 5min | ⬜ |
+| 3.1 | Analyser les chunks du build serveur | Terminal | 15min | ✅ |
+| 3.2 | Rechercher options Nuxt/Nitro pour exclure `@babel/parser` | Documentation | 30min | ✅ |
+| 3.3 | Appliquer la minification Nitro | `nuxt.config.ts` | 15min | ✅ |
+| 3.4 | Tester build + typecheck | Terminal | 10min | ✅ |
+| 3.5 | Rediger le rapport de faisabilite | `docs/rapport-ob-03.md` | 15min | ✅ |
+| 3.6 | Commit + push | Terminal | 5min | ⬜ |
 
-**Total OB-03 :** ~2h
+**Total OB-03 :** ~2h ✅
 
 ---
 
@@ -58,8 +58,8 @@
 | Phase | Lot | Taches | Effort total | Etat |
 |-------|-----|--------|-------------|------|
 | Phase 1 | OB-04 + OB-01 | 9 taches | ~45min | ✅ Termine |
-| Phase 2 | OB-03 | 6 taches | ~2h | ⬜ Planifie |
-| **Total** | **3 lots** | **15 taches** | **~2h30-3h30** | ⬜ |
+| Phase 2 | OB-03 | 6 taches | ~2h | ✅ Termine |
+| **Total** | **3 lots** | **15 taches** | **~2h30-3h30** | ✅ Sprint 01 termine |
 
 ---
 
