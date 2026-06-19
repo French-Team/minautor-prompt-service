@@ -319,7 +319,7 @@ export class MonitoringService {
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const criticalErrors = this.metrics.filter(
-      (m) => m.metric === 'errors.total' && m.timestamp >= oneHourAgo && m.tags?.severity === 'critical',
+      (m) => m.metric === 'errors.total' && m.timestamp >= oneHourAgo && m.tags?.severity === ErrorSeverity.CRITICAL,
     );
 
     const criticalCount = criticalErrors.reduce((sum, m) => sum + m.value, 0);

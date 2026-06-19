@@ -18,6 +18,5 @@ LPT1
 LPT2
 coverage/
 .kiro/
-.husky/
 playwright/
 playwright-report/

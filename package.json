@@ -15,6 +15,7 @@
     "lint": "eslint src/ pages/ components/ --ext .ts,.vue",
     "lint:fix": "eslint src/ pages/ components/ --ext .ts,.vue --fix",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.vue\" \"pages/**/*.vue\" \"components/**/*.vue\"",
+    "analyze": "npx nuxi analyze",
     "typecheck": "tsc --noEmit && vue-tsc --noEmit",
     "typecheck:vue": "vue-tsc --noEmit",
     "test": "vitest --run",
