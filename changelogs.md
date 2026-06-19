@@ -127,3 +127,67 @@ Les changements ci-dessous ont été effectués après le commit initial pour am
 2. **`useAppSettings()` dans layouts/default.vue** — appele sans utiliser la valeur de retour (effet de bord CSS)
 3. **`(window as any)` / `(process as any)`** dans context.vue — supprimes par eslint-disable, pattern intentionnel
 4. **Badges statiques** — les badges tests, lint, typecheck sont hardcodes (553, 0) et deviendront obsoletes si les metriques evoluent
+
+---
+
+## Optimisation obligatoire
+
+| ID | Priorite | Action | Gain attendu |
+|----|----------|--------|-------------|
+| OB-01 | 🔴 Critique | **Kill-port automatique avant `npm run build`** — le serveur de preview (port 3000) bloque la suppression de `.output/` | Builds fiables sans manipulation manuelle |
+| OB-02 | 🔴 Critique | **Nettoyer `.kiro/specs/`** — 11 specs historiques de l'ancien projet (dont `flux-workflow-system-v2`) qui ne refletent plus la realite du projet | Clarte et maintenabilite de la doc |
+| OB-03 | 🟡 Moyenne | **Investigar la reduction du bundle serveur** — `@babel/parser` (504 Ko) est embarque par `@vue/compiler-core`. Necessite une investigation plus approfondie pour determiner si ce poids peut etre reduit sans patcher Vue | ~500 Ko potentiels (a confirmer) |
+| OB-04 | 🟠 Haute | **Nettoyer `vite.optimizeDeps.include`** dans `nuxt.config.ts` — les entrees `src/index.ts` et `src/config/index.ts` n'ont d'effet qu'en mode dev, pas en production | Config plus propre, comprehension facilitee |
+| OB-05 | 🟡 Moyenne | **Rendre les badges README dynamiques** — brancher les badges tests/lint/typecheck sur des badges GitHub Actions au lieu de valeurs hardcodees | Metriques toujours a jour |
+| OB-06 | 🟡 Moyenne | **Ajouter `.env.example`** — documenter les variables d'environnement necessaires (si applicables) | Onboarding plus rapide |
+
+---
+
+## Améliorations possibles par priorité
+
+### Haute priorite 🟠
+
+| Amelioration | Description | Effort |
+|-------------|-------------|--------|
+| **Lazy loading des pages** | Les 6 pages sont chargées dans le chunk principal (184 Ko). Decomiser en chunks separes via `definePageMeta({ lazy: true })` | 1h |
+| **Tests dans le pre-commit hook** | Ajouter `vitest --run --related` pour ne lancer que les tests impactes par les fichiers staged (via `lint-staged`) | 30min |
+| **Tests dans le pipeline e2e CI** | Ajouter un workflow parallele `e2e.yml` declenche apres validation pour les tests Playwright, sans bloquer le merge | 2h |
+
+### Priorite moyenne 🟡
+
+| Amelioration | Description | Effort |
+|-------------|-------------|--------|
+| **Couverture de tests** | 553 tests unitaires c'est bien, mais la couverture des services (surtout error-handling) pourrait etre renforcee | 2-3h |
+| **Analyse visuelle du bundle** | Ajouter `rollup-plugin-visualizer` et lancer `nuxt build --analyze` pour identifier precisement ce qui gonfle le chunk principal | 30min |
+| **Migration des composables vues** | Remplacer les `.ts` dans `src/components/` (marques `@deprecated`) par les `.vue` dans `components/` — harmonisation | 1h |
+| **Validation e2e sur CI** | Ajouter un workflow `e2e.yml` parallele au `validate.yml` pour les tests Playwright | 1h |
+
+### Basse priorite 🟢
+
+| Amelioration | Description | Effort |
+|-------------|-------------|--------|
+| **Versioning du changelog** | Adopter le format [Keep a Changelog](https://keepachangelog.com/) avec versions semantiques et liens de comparaison GitHub | 15min |
+| **Script `npm run dev:ssl`** | Ajouter un script pour le developpement en HTTPS (utile pour tester les PWA/service workers) | 30min |
+| **Theme sombre avance** | Ajouter des variantes de theme sombre pour les composants (actuellement seulement le layout de base) | 2h |
+| **Documentation API** | Generer une doc OpenAPI/Swagger pour les routes Nitro dans `server/` | 2h |
+
+---
+
+## Roadmap suggeree
+
+```
+Sprint 1 : Optimisations obligatoires (OB-01 a OB-04)
+    OB-01 🔴 Kill-port automatique
+    OB-02 🔴 Nettoyage specs .kiro/
+    OB-03 🟠 Reduction bundle serveur
+    OB-04 🟠 Nettoyage config Vite
+    ↓
+Sprint 2 : Qualite et outils
+    OB-05 🟡 Badges dynamiques
+    OB-06 🟡 .env.example
+    Haute priorite : Lazy loading pages, Tests pre-commit
+    ↓
+Sprint 3 : Fonctionnalites et polish
+    Priorite moyenne : Bundle analyze, e2e CI, migration composants
+    Priorite basse : Dark theme, docs API
+```
