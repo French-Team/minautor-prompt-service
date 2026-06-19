@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS custom properties (surcomposés par useAppSettings) ── */
+:root {
+  --fs-base: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 12px;
+  --card-px: 16px;
+  --card-py: 12px;
+  --card-body-p: 16px;
+  --card-gap: 12px;
+  --sidebar-w: 224px;
+}
+
+@layer base {
+  html {
+    @apply bg-gray-100 text-gray-90 antialiased;
+    font-size: var(--fs-base);
+  }
+
+  ::selection {
+    @apply bg-ibm-60/15 text-ibm-70;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-30 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-gray-40; }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-gray-20 rounded-md;
+  }
+
+  .card-header {
+    @apply border-b border-gray-20;
+    padding: var(--card-py) var(--card-px);
+  }
+
+  .card-body {
+    padding: var(--card-body-p);
+  }
+
+  .badge-ibm {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-ibm-10 text-ibm-70 font-medium;
+  }
+  .badge-green {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-green-50 text-green-700 font-medium;
+  }
+  .badge-red {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-red-50 text-red-700 font-medium;
+  }
+  .badge-amber {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-amber-50 text-amber-700 font-medium;
+  }
+  .badge-blue {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-blue-50 text-blue-700 font-medium;
+  }
+  .badge-gray {
+    @apply text-xs px-2 py-0.5 rounded-sm bg-gray-10 text-gray-60 font-medium;
+  }
+
+  .section-title {
+    @apply text-xs font-semibold text-gray-50 uppercase tracking-wider mb-3;
+  }
+
+  .stat-value {
+    @apply text-xl font-semibold text-gray-90;
+  }
+
+  .stat-label {
+    @apply text-xs text-gray-50;
+  }
+
+  .table-header {
+    @apply text-left text-xs font-semibold text-gray-50 uppercase tracking-wider py-2 px-3;
+  }
+  .table-cell {
+    @apply py-2 px-3 text-sm text-gray-80 border-t border-gray-10;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-2.5 px-3 py-1.5 rounded text-sm font-medium transition-colors;
+  }
+  .nav-link-active {
+    @apply bg-ibm-10 text-ibm-70;
+  }
+  .nav-link-inactive {
+    @apply text-gray-60 hover:bg-gray-10 hover:text-gray-80;
+  }
+}
+
+/* ── Éléments liés aux settings ── */
+.input-field {
+  @apply w-full border border-gray-30 bg-white rounded px-2.5 py-1.5 placeholder-gray-40
+         focus:outline-none focus:border-ibm-60 focus:ring-1 focus:ring-ibm-60/30 transition-colors;
+  font-size: var(--fs-sm);
+  color: var(--tw-text-opacity, #161616);
+}
+
+.btn-ibm {
+  @apply bg-ibm-60 hover:bg-ibm-70 text-white font-medium py-1.5 px-3 rounded
+         transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  font-size: var(--fs-sm);
+}
+
+.btn-ghost {
+  @apply text-gray-60 hover:text-ibm-60 hover:bg-ibm-10 font-medium py-1.5 px-3 rounded transition-colors;
+  font-size: var(--fs-sm);
+}
+
+.progress-bar {
+  @apply w-full bg-gray-10 rounded-sm;
+  height: 6px;
+}
+.progress-fill {
+  @apply bg-ibm-60 rounded-sm transition-all;
+  height: 6px;
+}
+
+/* ──────────────────────────────────────────────
+   Theme sombre — overrides via classe .dark sur <html>
+   ────────────────────────────────────────────── */
+
+/* Base */
+html.dark {
+  @apply bg-gray-100 text-gray-10;
+}
+html.dark ::selection {
+  @apply bg-ibm-70/30 text-ibm-30;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  @apply bg-gray-70;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-60;
+}
+
+/* Fonds */
+html.dark .bg-gray-10 { background-color: #161616 !important; }
+html.dark .bg-white { background-color: #262626 !important; }
+html.dark .bg-gray-20 { background-color: #393939 !important; }
+html.dark .bg-gray-30 { background-color: #525252 !important; }
+html.dark .bg-red-50 { background-color: #450a0a !important; }
+html.dark .bg-amber-50 { background-color: #451a03 !important; }
+html.dark .bg-green-500 { background-color: #22c55e !important; }
+html.dark .bg-red-400 { background-color: #f87171 !important; }
+html.dark .bg-ibm-60 { background-color: #0f62fe !important; }
+html.dark .bg-ibm-10 { background-color: #001d6c !important; }
+
+/* Texte */
+html.dark .text-gray-90 { color: #f4f4f4 !important; }
+html.dark .text-gray-80 { color: #e0e0e0 !important; }
+html.dark .text-gray-70 { color: #c6c6c6 !important; }
+html.dark .text-gray-60 { color: #a8a8a8 !important; }
+html.dark .text-gray-50 { color: #8d8d8d !important; }
+html.dark .text-gray-40 { color: #6f6f6f !important; }
+html.dark .text-red-700 { color: #fca5a5 !important; }
+html.dark .text-red-600 { color: #fca5a5 !important; }
+html.dark .text-red-500 { color: #f87171 !important; }
+html.dark .text-green-700 { color: #86efac !important; }
+html.dark .text-green-600 { color: #4ade80 !important; }
+html.dark .text-amber-700 { color: #fbbf24 !important; }
+html.dark .text-amber-600 { color: #f59e0b !important; }
+html.dark .text-ibm-70 { color: #a6c8ff !important; }
+html.dark .text-ibm-60 { color: #78a9ff !important; }
+html.dark .text-white { color: #ffffff !important; }
+
+/* Bordures */
+html.dark .border-gray-20 { border-color: #525252 !important; }
+html.dark .border-gray-10 { border-color: #393939 !important; }
+html.dark .border-gray-30 { border-color: #6f6f6f !important; }
+html.dark .border-red-100 { border-color: #7f1d1d !important; }
+html.dark .border-amber-100 { border-color: #78350f !important; }
+
+/* Composants utiles */
+html.dark .card { background-color: #262626; border-color: #525252; }
+html.dark .card-header { border-color: #525252; }
+
+html.dark .badge-ibm { background-color: #001d6c; color: #a6c8ff; }
+html.dark .badge-gray { background-color: #262626; color: #a8a8a8; }
+html.dark .badge-green { background-color: #14532d; color: #86efac; }
+html.dark .badge-red { background-color: #7f1d1d; color: #fca5a5; }
+html.dark .badge-amber { background-color: #78350f; color: #fbbf24; }
+html.dark .badge-blue { background-color: #1e3a5f; color: #93c5fd; }
+
+html.dark .section-title { color: #8d8d8d; }
+html.dark .stat-value { color: #f4f4f4; }
+html.dark .stat-label { color: #8d8d8d; }
+
+html.dark .table-header { color: #8d8d8d; }
+html.dark .table-cell { color: #e0e0e0; border-color: #393939; }
+
+html.dark .nav-link-active { background-color: #001d6c; color: #a6c8ff; }
+html.dark .nav-link-inactive { color: #a8a8a8; }
+html.dark .nav-link-inactive:hover { background-color: #262626; color: #e0e0e0; }
+
+html.dark .input-field {
+  background-color: #262626;
+  border-color: #6f6f6f;
+  color: #f4f4f4;
+}
+html.dark .input-field::placeholder { color: #6f6f6f; }
+html.dark .input-field:focus { border-color: #78a9ff; --tw-ring-color: rgba(120,169,255,0.3); }
+
+html.dark .btn-ibm { background-color: #0f62fe; }
+html.dark .btn-ibm:hover { background-color: #0043ce; }
+
+html.dark .btn-ghost { color: #a8a8a8; }
+html.dark .btn-ghost:hover { color: #78a9ff; background-color: #001d6c; }
+
+html.dark .progress-bar { background-color: #393939; }
+html.dark .progress-fill { background-color: #78a9ff; }
+
+html.dark select option { background-color: #262626; color: #f4f4f4; }
+
+html.dark pre { background-color: #161616 !important; border-color: #525252 !important; color: #c6c6c6 !important; }
+
+html.dark input[type='checkbox'] { accent-color: #78a9ff; }
+
+.setting-row {
+  @apply flex items-center justify-between py-2 border-b border-gray-10 last:border-b-0;
+}
+
+.setting-label {
+  @apply text-sm font-medium text-gray-80;
+}
+
+.setting-desc {
+  @apply text-xs text-gray-50;
+}

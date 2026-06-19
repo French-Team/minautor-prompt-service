@@ -1,0 +1,23 @@
+node_modules/
+.nuxt/
+.output/
+dist/
+.env
+.env.*
+*.log
+.DS_Store
+
+# Windows reserved device names
+nul
+CON
+PRN
+AUX
+COM1
+COM2
+LPT1
+LPT2
+coverage/
+.kiro/
+.husky/
+playwright/
+playwright-report/

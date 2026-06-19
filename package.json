@@ -1,0 +1,66 @@
+{
+  "name": "minautor-prompts-system",
+  "version": "1.0.0",
+  "description": "Identity-based prompts system for LLM agents",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "prepare": "husky",
+    "lint": "eslint src/ pages/ components/ --ext .ts,.vue",
+    "lint:fix": "eslint src/ pages/ components/ --ext .ts,.vue --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.vue\" \"pages/**/*.vue\" \"components/**/*.vue\"",
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit",
+    "typecheck:vue": "vue-tsc --noEmit",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:e2e": "nuxt build && playwright test",
+    "test:e2e:fast": "playwright test",
+    "validate": "npm run build && npm run typecheck && npm test && npm run lint"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.vue": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "llm",
+    "prompts",
+    "identity",
+    "typescript",
+    "ai"
+  ],
+  "author": "System",
+  "license": "MIT",
+  "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.8.0",
+    "nuxt": "^3.21.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@nuxt/test-utils": "^3.23.0",
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "@vue/test-utils": "^2.4.11",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.9.2",
+    "happy-dom": "^20.10.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.6",
+    "vue-tsc": "^3.3.5"
+  }
+}
