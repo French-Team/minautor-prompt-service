@@ -1,4 +1,7 @@
 <div align="center">
+  <p>
+    <img src="assets/images/logo-minautor.png" alt="Minautor Prompt Service" width="300" />
+  </p>
   <h1>🤖 Minautor Prompt Service</h1>
   <p>
     <strong>Système de prompts intelligents basés sur l'identité pour agents LLM</strong>
