@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/e2e-18%20%E2%9C%85%20%7C%205%20%E2%8F%AD%EF%B8%8F-orange" alt="18 e2e passes">
     <img src="https://img.shields.io/badge/lint-0%20errors%20%E2%9C%85-success" alt="0 lint errors">
     <img src="https://img.shields.io/badge/typecheck-0%20errors%20%E2%9C%85-success" alt="0 typecheck errors">
-    <img src="https://img.shields.io/github/actions/workflow/status/French-Team/minautor-prompt-service/validate.yml?label=validate&logo=github" alt="CI validate">
+    <img src="https://img.shields.io/github/actions/workflow/status/French-Team/minautor-prompt-service/validate.yml?label=validate&amp;logo=github" alt="CI validate">
   </p>
 </div>
 
