@@ -1,0 +1,35 @@
+name: Validate
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main]
+
+env:
+  NODE_VERSION: '22'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 🔄 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build + Typecheck + Test + Lint
+        run: npm run validate
