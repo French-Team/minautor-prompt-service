@@ -223,6 +223,56 @@ html.dark pre { background-color: #161616 !important; border-color: #525252 !imp
 
 html.dark input[type='checkbox'] { accent-color: #78a9ff; }
 
+/* Textarea — comme input-field mais pour paragraphes */
+html.dark textarea {
+  background-color: #262626;
+  border-color: #6f6f6f;
+  color: #f4f4f4;
+}
+html.dark textarea::placeholder { color: #6f6f6f; }
+html.dark textarea:focus { border-color: #78a9ff; --tw-ring-color: rgba(120,169,255,0.3); }
+
+/* Boutons alternatifs (settings) — bg-white + border */
+html.dark .border-gray-30.text-gray-60.hover\:bg-gray-10 {
+  background-color: #262626;
+}
+
+/* FolderTreePicker modal + overlay */
+html.dark .bg-black\/30 { background-color: rgba(0, 0, 0, 0.6) !important; }
+html.dark .rounded-lg.shadow-xl.border.border-gray-20 {
+  background-color: #262626;
+  border-color: #525252;
+}
+html.dark .bg-gray-10\/50 { background-color: rgba(22, 22, 22, 0.5) !important; }
+html.dark .bg-gray-10\/30 { background-color: rgba(22, 22, 22, 0.3) !important; }
+html.dark .hover\:bg-gray-20:hover { background-color: #393939 !important; }
+
+/* FolderTreePicker entries */
+html.dark .hover\:bg-ibm-10:hover { background-color: #001d6c !important; }
+html.dark .group:hover .text-gray-70 { color: #e0e0e0; }
+
+/* Loading spinner */
+html.dark .border-ibm-60.border-t-transparent {
+  border-color: #78a9ff;
+  border-top-color: transparent;
+}
+
+/* Spinner container text */
+html.dark .flex.items-center.justify-center.py-10 .text-gray-50 {
+  color: #8d8d8d;
+}
+
+/* Sélecteur actif dans FolderTreePicker (breadcrumb) */
+html.dark .font-semibold.text-gray-80 { color: #e0e0e0; }
+
+/* Transition overlay */
+html.dark .fixed.inset-0.z-50 button.text-gray-40 {
+  color: #6f6f6f;
+}
+html.dark .fixed.inset-0.z-50 button.text-gray-40:hover {
+  color: #a8a8a8;
+}
+
 /* ── Page transitions ── */
 .page-enter-active,
 .page-leave-active {

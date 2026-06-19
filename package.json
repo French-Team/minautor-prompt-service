@@ -8,6 +8,7 @@
     "build:clean": "npx kill-port 3000 || true; nuxt build",
     "build": "npm run build:clean",
     "dev": "nuxt dev",
+    "dev:ssl": "nuxt dev --https",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
