@@ -2,9 +2,33 @@
 
 **Projet :** Minautor Prompt Service  
 **Sprint :** 01 — Optimisations obligatoires  
-**Perimetre :** OB-01 a OB-04  
-**Duree estimee :** 4-6 heures  
+**Perimetre :** OB-01, OB-04, OB-03  
+**Duree estimee :** 2h30-3h30  
 **Objectif :** Stabiliser la chaine de build et nettoyer le projet
+
+> **Note :** OB-02 (nettoyage `.kiro/specs/`) est supprime — le dossier `.kiro/` a ete entierement supprime du projet.
+
+---
+
+## OB-04 : Nettoyer `vite.optimizeDeps.include` dans `nuxt.config.ts` 🟠 Haute
+
+### Probleme
+`vite.optimizeDeps.include` contient `src/index.ts` et `src/config/index.ts` qui n'ont d'effet qu'en mode developpement. En production (build Nuxt), ces entrees sont inutiles.
+
+### Solution
+Supprimer la section `optimizeDeps.include` de `nuxt.config.ts`.
+
+### Actions
+
+| # | Action | Fichier |
+|---|--------|---------|
+| 4.1 | Supprimer `vite.optimizeDeps` du fichier de config | `nuxt.config.ts` |
+| 4.2 | Tester `npm run dev` (verifier qu'il demarre toujours) | Terminal |
+| 4.3 | Tester `npm run build` (build OK) | Terminal |
+
+### Criteres de validation
+- `npm run dev` demarre sans erreur
+- `npm run build` reussi
 
 ---
 
@@ -29,53 +53,6 @@ Ajouter un script `build:clean` qui tue le port 3000 avant de lancer le build, e
 ### Criteres de validation
 - `npm run build` reussi meme si un serveur tourne sur le port 3000
 - `npm run validate` ne bloque plus sur `EBUSY`
-
----
-
-## OB-02 : Nettoyer les specs `.kiro/` 🔴 Critique
-
-### Probleme
-11 dossiers de specifications historiques (`.kiro/specs/`) de l'ancien projet subsistent, dont certaines parlent d'architectures qui n'existent plus (Flux Workflow v1/v2, etc.).
-
-### Solution
-Auditer chaque spec, archiver celles qui sont obsoletes, conserver celles qui sont encore pertinentes.
-
-### Actions
-
-| # | Action | Fichier |
-|---|--------|---------|
-| 2.1 | Lister les 11 specs avec leur contenu et les classifier (pertinent / obsolete) | `.kiro/specs/` |
-| 2.2 | Deplacer les specs obsoletes dans `.kiro/specs/archived/` | `.kiro/specs/` |
-| 2.3 | Conserver les specs encore pertinentes sur place | `.kiro/specs/` |
-| 2.4 | Mettre a jour les fichiers de steering si necessaire | `.kiro/steering/` |
-| 2.5 | Valider que les hooks Kiro fonctionnent toujours | `.kiro/hooks/` |
-
-### Criteres de validation
-- Les specs en double ou obsoletes sont archivees
-- Les specs pertinentes sont conservees
-- Aucun hook Kiro casse
-
----
-
-## OB-04 : Nettoyer `vite.optimizeDeps.include` dans `nuxt.config.ts` 🟠 Haute
-
-### Probleme
-`vite.optimizeDeps.include` contient `src/index.ts` et `src/config/index.ts` qui n'ont d'effet qu'en mode developpement. En production (build Nuxt), ces entrees sont inutiles.
-
-### Solution
-Supprimer la section `optimizeDeps.include` de `nuxt.config.ts`.
-
-### Actions
-
-| # | Action | Fichier |
-|---|--------|---------|
-| 4.1 | Supprimer `vite.optimizeDeps` du fichier de config | `nuxt.config.ts` |
-| 4.2 | Tester `npm run dev` (verifier qu'il demarre toujours) | Terminal |
-| 4.3 | Tester `npm run build` (build OK) | Terminal |
-
-### Criteres de validation
-- `npm run dev` demarre sans erreur
-- `npm run build` reussi
 
 ---
 
@@ -105,15 +82,11 @@ Analyse du bundle serveur et investigation des options de configuration Nuxt/Nit
 ## Planning d'execution
 
 ```
-Phase 1 : OB-01 + OB-04 (config, rapide, impact fort)       ~1h
+Phase 1 : OB-04 + OB-01 (config + kill-port, impact fort)      ~1h
     OB-04 Nettoyage config Vite (15min)
     OB-01 Kill-port automatique (30min)
     ↓
-Phase 2 : OB-02 Audit specs .kiro/                           ~2h
-    Classification des 11 specs
-    Archivage des obsoletes
-    ↓
-Phase 3 : OB-03 Investigation bundle serveur                ~2h
+Phase 2 : OB-03 Investigation bundle serveur                   ~2h
     Analyse des chunks
     Recherche de solution
     Rapport de faisabilite
@@ -126,7 +99,6 @@ Phase 3 : OB-03 Investigation bundle serveur                ~2h
 | Risque | Impact | Mitigation |
 |--------|--------|------------|
 | `kill-port` non disponible sur tous les OS | Bloquant pour CI | Utiliser `npx --yes kill-port` (portable) |
-| Spec .kiro pertinentes identifiees par erreur comme obsoletes | Perte d'information | Archivage, pas de suppression definitive |
 | `@babel/parser` impossible a exclure du bundle SSR | Gain nul sur OB-03 | Documenter et passer a la tache suivante |
 | Regression apres nettoyage config Vite | Build casse | Tester `npm run validate` complet |
 
@@ -137,7 +109,6 @@ Phase 3 : OB-03 Investigation bundle serveur                ~2h
 | Livrable | Description |
 |----------|-------------|
 | `package.json` mis a jour | Script `build:clean` + `validate` modifie |
-| `.kiro/specs/` nettoye | Specs archivees et organisees |
 | `nuxt.config.ts` nettoye | Section `optimizeDeps` supprimee |
 | Rapport OB-03 | Faisabilite de la reduction du bundle serveur |
 | `todo-list_01.md` mis a jour | Suivi des taches completees |

@@ -2,8 +2,10 @@
 
 **Projet :** Minautor Prompt Service  
 **Sprint :** 01 — Optimisations obligatoires  
-**Ordre d'execution :** cf. `dev-plan-01.md` — Phase 1 → Phase 2 → Phase 3  
+**Ordre d'execution :** cf. `dev-plan-01.md` — Phase 1 → Phase 2  
 **Etat :** 📋 Planifie  
+
+> **Note :** OB-02 (nettoyage `.kiro/specs/`) supprime — le dossier `.kiro/` a ete entierement supprime du projet.
 
 ---
 
@@ -36,23 +38,7 @@
 
 ---
 
-## [Phase 2] OB-02 : Nettoyer les specs `.kiro/` 🔴 Critique
-
-| # | Tache | Fichier | Effort | Etat |
-|---|-------|---------|--------|------|
-| 2.1 | Lister et classifier les 11 specs | `.kiro/specs/` | 30min | ⬜ |
-| 2.2 | Creer le dossier `archived/` | `.kiro/specs/` | 5min | ⬜ |
-| 2.3 | Deplacer les specs obsoletes | `.kiro/specs/` | 15min | ⬜ |
-| 2.4 | Conserver les specs pertinentes | `.kiro/specs/` | 5min | ⬜ |
-| 2.5 | Mettre a jour les fichiers steering | `.kiro/steering/` | 15min | ⬜ |
-| 2.6 | Valider les hooks Kiro | `.kiro/hooks/` | 10min | ⬜ |
-| 2.7 | Commit + push | Terminal | 5min | ⬜ |
-
-**Total OB-02 :** ~1h30
-
----
-
-## [Phase 3] OB-03 : Investigation bundle serveur 🟡 Moyenne
+## [Phase 2] OB-03 : Investigation bundle serveur 🟡 Moyenne
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
@@ -72,9 +58,8 @@
 | Phase | Lot | Taches | Effort total | Etat |
 |-------|-----|--------|-------------|------|
 | Phase 1 | OB-04 + OB-01 | 9 taches | ~45min | ⬜ Planifie |
-| Phase 2 | OB-02 | 7 taches | ~1h30 | ⬜ Planifie |
-| Phase 3 | OB-03 | 6 taches | ~2h | ⬜ Planifie |
-| **Total** | **4 lots** | **22 taches** | **~4h-6h** | ⬜ |
+| Phase 2 | OB-03 | 6 taches | ~2h | ⬜ Planifie |
+| **Total** | **3 lots** | **15 taches** | **~2h30-3h30** | ⬜ |
 
 ---
 
