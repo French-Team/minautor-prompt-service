@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js&logoColor=white" alt="Vue 3">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="License MIT">
     <br>
-    <img src="https://img.shields.io/badge/tests-553%20%E2%9C%85-success" alt="553 tests">
+    <img src="https://img.shields.io/badge/tests-577%20%E2%9C%85-success" alt="577 tests">
     <img src="https://img.shields.io/badge/e2e-18%20%E2%9C%85%20%7C%205%20%E2%8F%AD%EF%B8%8F-orange" alt="18 e2e passes">
     <img src="https://img.shields.io/badge/lint-0%20errors%20%E2%9C%85-success" alt="0 lint errors">
     <img src="https://img.shields.io/badge/typecheck-0%20errors%20%E2%9C%85-success" alt="0 typecheck errors">
@@ -69,10 +69,12 @@ npm run dev
 | `npm run dev` | Serveur de developpement Nuxt |
 | `npm run build` | Build de production |
 | `npm run validate` | Pipeline complet : build + typecheck + test + lint |
-| `npm test` | 553 tests unitaires Vitest |
+| `npm test` | 577 tests unitaires Vitest |
 | `npm run test:e2e` | 23 tests end-to-end Playwright |
 | `npm run lint` | ESLint strict — 0 erreur, 0 warning |
 | `npm run typecheck` | Verification TypeScript (tsc + vue-tsc) |
+| `npm run dev:ssl` | Serveur de dev en HTTPS (auto-certificats) |
+| `npm run analyze` | Analyse visuelle du bundle (nuxi analyze) |
 
 ---
 
@@ -87,7 +89,6 @@ flux-de-travail/
 │   ├── services/              #    Services metier (resolveur, generateur, cache...)
 │   │   └── error-handling/    #    Gestion centralisee des erreurs
 │   ├── config/                #    Configuration + injecteur de dependances
-│   └── components/            #    Composants via librairie (deprecies cote Nuxt)
 ├── components/                #  Composants Vue 3 (4 composants reutilisables)
 ├── pages/                     #  Pages Nuxt (6 pages)
 ├── layouts/                   #   Layouts (header, navigation, theme)
@@ -107,7 +108,7 @@ flux-de-travail/
 | Vue | 3 (latest) | Interface utilisateur reactive |
 | TypeScript | 5.9 | Typage strict — 0 erreur |
 | Tailwind CSS | 6.8 | Design system utility-first |
-| Vitest | 3.2 | Tests unitaires (553) |
+| Vitest | 3.2 | Tests unitaires (577) |
 | Playwright | 1.61 | Tests e2e (23) |
 | ESLint | 10.0 | Linting strict |
 | vue-tsc | 3.3 | Type-checking des templates .vue |
@@ -120,13 +121,27 @@ flux-de-travail/
 |----------|--------|
 | Fichiers source | ~50 .ts + ~10 .vue |
 | Lignes de code | ~8 500 |
-| Tests unitaires | 553 — 32 fichiers, 100% |
+| Tests unitaires | 577 — 34 fichiers, 100% |
 | Tests e2e | 23 — 18 OK + 5 skips intentionnels |
 | Bundle client | 439 Ko (69 Ko gzip) |
 | Bundle serveur | 2.9 Mo |
-| Lint | 0 erreur, 0 warning |
-| Typecheck | 0 erreur |
+| Lint | 0 erreur, 44 warnings preexistants |
+| Typecheck | 0 erreur (tsc + vue-tsc) |
 | `any` restants | 0 (hors 2 eslint-designes intentionnels) |
+| Commits | 17 |
+
+---
+
+## 🏆 Bilan des sprints
+
+| Sprint | Perimetre | Changements |
+|--------|-----------|-------------|
+| **Sprint 01** 🔧 | Optimisations obligatoires | Kill-port automatique (`build:clean`), nettoyage config Vite, investigation bundle serveur (`nitro.minify`) |
+| **Sprint 02** 🎯 | Haute priorite | Lazy loading (`NuxtLoadingIndicator`, transitions), pre-commit hook (`lint-staged + npm test`), e2e CI etendu a `master` |
+| **Sprint 03** 🧪 | Moyenne priorite | +24 tests (monitoring, error-handler chain), analyse bundle (`nuxi analyze`), suppression de 5 fichiers `@deprecated` |
+| **Sprint 04** 🌙 | Basse priorite | Keep a Changelog, dark theme avance (textarea, modal, spinner), script `dev:ssl` |
+
+**Au total :** 17 commits, 577 tests, 0 erreur lint, 0 erreur typecheck, ~45 fichiers modifies.
 
 ---
 
@@ -144,7 +159,7 @@ npx vitest --run src/test/services/identity-resolver.test.ts
 npx playwright test e2e/reanalyze-button.spec.ts
 ```
 
-Le **pre-commit hook** Husky verifie automatiquement le lint via lint-staged avant chaque commit.
+Le **pre-commit hook** Husky verifie automatiquement le lint et les tests avant chaque commit.
 
 ---
 
