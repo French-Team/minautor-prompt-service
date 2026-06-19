@@ -26,6 +26,8 @@ const iconPaths: Record<string, string> = {
 </script>
 
 <template>
+  <NuxtLoadingIndicator color="#0f62fe" :height="2" />
+
   <div class="h-screen flex overflow-hidden bg-gray-10 text-gray-80">
     <!-- Sidebar -->
     <aside

@@ -3,7 +3,10 @@ import { usePromptSystem } from '~/composables/usePromptSystem';
 import type { UserIdentity } from '~/src/models/identity';
 import type { ProjectContext } from '~/src/models/context';
 
-definePageMeta({ title: 'Dashboard' });
+definePageMeta({
+  title: 'Dashboard',
+  keepalive: true,
+});
 
 const { identityResolver, contextAnalyzer, isDegradedMode } = usePromptSystem();
 

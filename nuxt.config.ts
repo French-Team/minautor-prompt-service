@@ -19,6 +19,10 @@ export default defineNuxtConfig({
         { name: 'description', content: "Interface Nuxt pour le système de prompts basés sur l'identité" },
       ],
     },
+    pageTransition: {
+      name: 'page',
+      mode: 'out-in',
+    },
   },
 
   // Alias pour accéder au code de la librairie depuis `~src/...`

@@ -223,6 +223,20 @@ html.dark pre { background-color: #161616 !important; border-color: #525252 !imp
 
 html.dark input[type='checkbox'] { accent-color: #78a9ff; }
 
+/* ── Page transitions ── */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 .setting-row {
   @apply flex items-center justify-between py-2 border-b border-gray-10 last:border-b-0;
 }
