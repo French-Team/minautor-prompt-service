@@ -2,11 +2,27 @@
 
 **Projet :** Minautor Prompt Service  
 **Sprint :** 01 — Optimisations obligatoires  
+**Ordre d'execution :** cf. `dev-plan-01.md` — Phase 1 → Phase 2 → Phase 3  
 **Etat :** 📋 Planifie  
 
 ---
 
-## OB-01 : Kill-port automatique avant build 🔴 Critique
+## [Phase 1] OB-04 : Nettoyer `vite.optimizeDeps.include` 🟠 Haute
+
+*Quick win — 15 min, zero risque.*
+
+| # | Tache | Fichier | Effort | Etat |
+|---|-------|---------|--------|------|
+| 4.1 | Supprimer `vite.optimizeDeps` | `nuxt.config.ts` | 5min | ⬜ |
+| 4.2 | Tester `npm run dev` | Terminal | 5min | ⬜ |
+| 4.3 | Tester `npm run build` | Terminal | 1min | ⬜ |
+| 4.4 | Commit + push | Terminal | 5min | ⬜ |
+
+**Total OB-04 :** ~15min
+
+---
+
+## [Phase 1] OB-01 : Kill-port automatique avant build 🔴 Critique
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
@@ -20,7 +36,7 @@
 
 ---
 
-## OB-02 : Nettoyer les specs `.kiro/` 🔴 Critique
+## [Phase 2] OB-02 : Nettoyer les specs `.kiro/` 🔴 Critique
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
@@ -36,20 +52,7 @@
 
 ---
 
-## OB-04 : Nettoyer `vite.optimizeDeps.include` 🟠 Haute
-
-| # | Tache | Fichier | Effort | Etat |
-|---|-------|---------|--------|------|
-| 4.1 | Supprimer `vite.optimizeDeps` | `nuxt.config.ts` | 5min | ⬜ |
-| 4.2 | Tester `npm run dev` | Terminal | 5min | ⬜ |
-| 4.3 | Tester `npm run build` | Terminal | 1min | ⬜ |
-| 4.4 | Commit + push | Terminal | 5min | ⬜ |
-
-**Total OB-04 :** ~15min
-
----
-
-## OB-03 : Investigation bundle serveur 🟡 Moyenne
+## [Phase 3] OB-03 : Investigation bundle serveur 🟡 Moyenne
 
 | # | Tache | Fichier | Effort | Etat |
 |---|-------|---------|--------|------|
@@ -66,13 +69,12 @@
 
 ## Recapitulatif
 
-| Lot | Taches | Effort total | Etat |
-|-----|--------|-------------|------|
-| OB-01 | 5 taches | ~30min | ⬜ Planifie |
-| OB-02 | 7 taches | ~1h30 | ⬜ Planifie |
-| OB-04 | 4 taches | ~15min | ⬜ Planifie |
-| OB-03 | 6 taches | ~2h | ⬜ Planifie |
-| **Total** | **22 taches** | **~4h-6h** | ⬜ |
+| Phase | Lot | Taches | Effort total | Etat |
+|-------|-----|--------|-------------|------|
+| Phase 1 | OB-04 + OB-01 | 9 taches | ~45min | ⬜ Planifie |
+| Phase 2 | OB-02 | 7 taches | ~1h30 | ⬜ Planifie |
+| Phase 3 | OB-03 | 6 taches | ~2h | ⬜ Planifie |
+| **Total** | **4 lots** | **22 taches** | **~4h-6h** | ⬜ |
 
 ---
 
