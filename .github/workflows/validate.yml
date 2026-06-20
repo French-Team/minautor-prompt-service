@@ -29,7 +29,8 @@ jobs:
           cache: npm
 
       - name: 📦 Install dependencies
-        run: npm ci
+        # 'npm ci' strict FAILS sur EBADPLATFORM quand le lockfile contient des optionalDependencies multiplateformes (ex. @rolldown/binding-android-arm64) que la CI Linux/x64 ne peut pas installer. On utilise 'npm install --os=linux --cpu=x64 --libc=glibc --include=optional' qui filtre par plateforme tout en installant les optionnels compatibles avec Linux/x64/glibc (notamment @esbuild/linux-x64-gnu et @rolldown/binding-linux-x64-gnu utilisés par Nuxt/Vite).
+        run: npm install --os=linux --cpu=x64 --libc=glibc --include=optional
 
       - name: 🏗️ Build + Typecheck + Test + Lint
         run: npm run validate
