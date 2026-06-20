@@ -382,8 +382,7 @@ async function generate() {
                 openSection === 'personnalisation' ? 'rotate-180' : '',
               ]"
               aria-hidden="true"
-              >▾</span
-            >
+            >▾</span>
           </span>
         </button>
         <Transition name="collapse">
@@ -431,8 +430,7 @@ async function generate() {
                 openSection === 'parametres' ? 'rotate-180' : '',
               ]"
               aria-hidden="true"
-              >▾</span
-            >
+            >▾</span>
           </span>
         </button>
         <Transition name="collapse">
@@ -468,7 +466,7 @@ async function generate() {
                       placeholder="Filtrer (nom, description)…"
                       class="input-field text-xs w-full"
                       :disabled="!templates.length"
-                    />
+                    >
                   </div>
 
                   <!-- Sélecteur de sous-catégories (cascade : depend de l'identité courante) -->
@@ -598,8 +596,7 @@ async function generate() {
                     class="bg-amber-50 border border-amber-100 text-amber-700 px-2.5 py-1.5 rounded text-xs"
                   >
                     Champs requis manquants :
-                    <strong>{{ requiredVarsMissing.join(', ') }}</strong
-                    >.
+                    <strong>{{ requiredVarsMissing.join(', ') }}</strong>.
                   </div>
 
                   <button :disabled="loading || !canGenerate" class="btn-ibm w-full text-xs" @click="generate">
@@ -689,7 +686,7 @@ async function generate() {
                         type="text"
                         class="input-field text-xs"
                         :placeholder="String(v.defaultValue ?? '')"
-                      />
+                      >
                       <p v-if="v.description" class="text-[10px] text-gray-40">
                         {{ v.description }}
                       </p>
@@ -770,8 +767,7 @@ async function generate() {
                   <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1">Contenu</p>
                   <pre
                     class="bg-gray-10 border border-gray-20 rounded p-2.5 text-[11px] whitespace-pre-wrap font-mono text-gray-70"
-                    >{{ result.content }}</pre
-                  >
+                  >{{ result.content }}</pre>
                 </div>
                 <div v-if="result.appliedRules?.length" class="pt-1">
                   <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1">

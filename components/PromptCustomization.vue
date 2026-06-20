@@ -161,7 +161,7 @@ async function save() {
             v-model="prefs.includeExamples"
             type="checkbox"
             class="w-3.5 h-3.5 rounded border-gray-30 text-ibm-60 focus:ring-ibm-60/30"
-          />
+          >
           Inclure des exemples concrets
         </label>
         <label class="inline-flex items-center gap-2 text-xs text-gray-60 cursor-pointer">
@@ -169,7 +169,7 @@ async function save() {
             v-model="prefs.includeReferences"
             type="checkbox"
             class="w-3.5 h-3.5 rounded border-gray-30 text-ibm-60 focus:ring-ibm-60/30"
-          />
+          >
           Inclure des références
         </label>
       </div>

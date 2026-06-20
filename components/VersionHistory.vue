@@ -129,8 +129,8 @@ watch(
             placeholder="promptId"
             class="input-field text-xs"
             :disabled="!!promptId"
-          />
-          <input v-model="newReason" type="text" placeholder="Raison du changement" class="input-field text-xs" />
+          >
+          <input v-model="newReason" type="text" placeholder="Raison du changement" class="input-field text-xs">
         </div>
         <textarea
           v-model="newContent"
@@ -217,8 +217,7 @@ watch(
 
                 <pre
                   class="bg-white border border-gray-20 rounded p-1.5 text-[11px] whitespace-pre-wrap font-mono text-gray-60 max-h-16 overflow-y-auto"
-                  >{{ v.content }}</pre
-                >
+                >{{ v.content }}</pre>
               </div>
             </div>
           </div>

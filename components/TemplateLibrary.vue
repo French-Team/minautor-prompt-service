@@ -191,12 +191,12 @@ onMounted(loadTemplates);
       <div class="card-header"><h3 class="text-xs font-semibold text-gray-80">Nouveau template</h3></div>
       <div class="card-body space-y-2">
         <div class="grid grid-cols-2 gap-2">
-          <input v-model="draft.name" type="text" placeholder="Nom" class="input-field text-xs" />
+          <input v-model="draft.name" type="text" placeholder="Nom" class="input-field text-xs">
           <select v-model="draft.category" class="input-field text-xs">
             <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
           </select>
         </div>
-        <input v-model="draft.description" type="text" placeholder="Description" class="input-field text-xs" />
+        <input v-model="draft.description" type="text" placeholder="Description" class="input-field text-xs">
         <textarea
           v-model="draft.template"
           rows="2"
@@ -215,7 +215,7 @@ onMounted(loadTemplates);
               type="checkbox"
               :value="i"
               class="rounded border-gray-30 text-ibm-60 focus:ring-ibm-60/30"
-            />
+            >
             {{ i }}
           </label>
         </div>
@@ -228,7 +228,7 @@ onMounted(loadTemplates);
 
     <!-- Search / filter -->
     <div v-if="filterable" class="flex gap-2 mb-3">
-      <input v-model="search" type="text" placeholder="Rechercher…" class="input-field text-xs flex-1" />
+      <input v-model="search" type="text" placeholder="Rechercher…" class="input-field text-xs flex-1">
       <select v-model="filterCategory" class="input-field text-xs w-36">
         <option value="all">Toutes</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
@@ -265,8 +265,7 @@ onMounted(loadTemplates);
           </div>
           <pre
             class="bg-gray-10 border border-gray-20 rounded p-2 text-[11px] whitespace-pre-wrap font-mono text-gray-60 max-h-20 overflow-hidden"
-            >{{ t.template }}</pre
-          >
+          >{{ t.template }}</pre>
           <div v-if="showUsage" class="flex items-center gap-3 mt-1.5 text-[10px] text-gray-40">
             <span>{{ t.variables?.length || 0 }} variable(s)</span>
             <span>v{{ t.version }}</span>

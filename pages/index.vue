@@ -83,9 +83,7 @@ onMounted(async () => {
               <div class="pt-2">
                 <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1">Permissions</p>
                 <div class="flex flex-wrap gap-1">
-                  <span v-for="p in identity.permissions" :key="p.action + p.resource" class="badge-ibm"
-                    >{{ p.action }}:{{ p.resource }}</span
-                  >
+                  <span v-for="p in identity.permissions" :key="p.action + p.resource" class="badge-ibm">{{ p.action }}:{{ p.resource }}</span>
                 </div>
               </div>
             </div>

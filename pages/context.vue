@@ -153,7 +153,7 @@ const statusBadge = (s: string) => {
               placeholder="Chemin du dossier (ex: /home/user/project)"
               class="input-field text-xs w-full pr-9"
               readonly
-            />
+            >
             <button
               class="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded text-gray-40 hover:text-ibm-60 hover:bg-gray-10 transition-colors"
               title="Parcourir…"
@@ -345,9 +345,7 @@ const statusBadge = (s: string) => {
             <span class="text-xs text-gray-70">{{ context.technicalEcosystem.runtime }}</span>
           </div>
           <div class="py-1">
-            <span class="text-gray-50 text-xs block mb-1"
-              >Dépendances ({{ context.technicalEcosystem.dependencies.length }})</span
-            >
+            <span class="text-gray-50 text-xs block mb-1">Dépendances ({{ context.technicalEcosystem.dependencies.length }})</span>
             <div class="space-y-0.5">
               <div
                 v-for="d in context.technicalEcosystem.dependencies.slice(0, 5)"

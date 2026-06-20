@@ -85,8 +85,7 @@ onMounted(() => loadIdentity('User'));
 
     <p v-if="!loading && identity" class="text-[11px] text-gray-50 mb-3">
       Profil runtime : <strong class="text-gray-80">{{ currentRuntimeProfile }}</strong> (affiché :
-      <strong class="text-gray-80">{{ currentLabel }}</strong
-      >)
+      <strong class="text-gray-80">{{ currentLabel }}</strong>)
     </p>
 
     <div v-else-if="identity" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -114,23 +113,17 @@ onMounted(() => loadIdentity('User'));
           </div>
           <div v-if="profile?.simplificationLevel" class="py-1">
             <span class="text-gray-50 text-xs block mb-0.5">Spécifique User</span>
-            <span class="text-[10px] text-gray-50"
-              >simplification: {{ profile.simplificationLevel }} · longueur: {{ profile.preferredResponseLength }} ·
-              profondeur: {{ profile.technicalDepth }}</span
-            >
+            <span class="text-[10px] text-gray-50">simplification: {{ profile.simplificationLevel }} · longueur: {{ profile.preferredResponseLength }} ·
+              profondeur: {{ profile.technicalDepth }}</span>
           </div>
           <div v-if="profile?.optimizationFocus" class="py-1">
             <span class="text-gray-50 text-xs block mb-0.5">Spécifique Superviseur</span>
-            <span class="text-[10px] text-gray-50"
-              >focus: {{ profile.optimizationFocus.join(', ') }} · suggestions: {{ profile.suggestionLevel }} ·
-              alternatives: {{ profile.alternativeCount }}</span
-            >
+            <span class="text-[10px] text-gray-50">focus: {{ profile.optimizationFocus.join(', ') }} · suggestions: {{ profile.suggestionLevel }} ·
+              alternatives: {{ profile.alternativeCount }}</span>
           </div>
           <div v-if="profile?.qualityChecks" class="py-1">
             <span class="text-gray-50 text-xs block mb-0.5">Spécifique Responsable</span>
-            <span class="text-[10px] text-gray-50"
-              >checks: {{ profile.qualityChecks.join(', ') }} · risque: {{ profile.riskTolerance }}</span
-            >
+            <span class="text-[10px] text-gray-50">checks: {{ profile.qualityChecks.join(', ') }} · risque: {{ profile.riskTolerance }}</span>
           </div>
         </div>
       </div>
@@ -167,9 +160,7 @@ onMounted(() => loadIdentity('User'));
           <div class="mt-4">
             <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1.5">Permissions accordées</p>
             <div class="flex flex-wrap gap-1">
-              <span v-for="p in identity.permissions" :key="p.action + p.resource" class="badge-ibm font-mono"
-                >{{ p.action }}:{{ p.resource }}</span
-              >
+              <span v-for="p in identity.permissions" :key="p.action + p.resource" class="badge-ibm font-mono">{{ p.action }}:{{ p.resource }}</span>
             </div>
           </div>
         </div>
