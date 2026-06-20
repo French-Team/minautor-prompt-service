@@ -66,5 +66,8 @@
     "typescript": "^5.9.3",
     "vitest": "^3.2.6",
     "vue-tsc": "^3.3.5"
+  },
+  "overrides": {
+    "commander": "^13.1.0"
   }
 }
