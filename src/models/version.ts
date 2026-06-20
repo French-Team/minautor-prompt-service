@@ -23,6 +23,10 @@ export interface VersionChange {
 
 export interface VersionMetadata {
   changeReason: string;
+  /** Identité courante au moment de la création (ajouté en Mission 04 tâche 4.3). */
+  identityType?: 'User' | 'Superviseur' | 'Responsable';
+  /** ID du template utilisé pour générer la version (ajouté en Mission 04 tâche 4.3). */
+  templateId?: string;
   performanceMetrics?: PerformanceMetrics;
   qualityScore?: number;
   userFeedback?: UserFeedback[];

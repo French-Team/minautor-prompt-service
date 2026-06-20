@@ -201,6 +201,30 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const statusMessage = ref<string | null>(null);
 
+// M04 tâche 4.3 : trace la version qui vient d'être créée pour afficher un badge
+// "Version v?.?.? créée" dans la modal Résultat. Auto-clear après 5s via `versionTimestamp`.
+// Le timer est tracké pour être annulé en onBeforeUnmount (évite mutation après unmount).
+const lastCreatedVersion = ref<{ id: string; version: string } | null>(null);
+const versionTimestamp = ref<number>(0);
+let versionBadgeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showVersionBadge(version: { id: string; version: string }) {
+  lastCreatedVersion.value = version;
+  versionTimestamp.value = Date.now();
+  // Annule le timer précédent (si l'utilisateur enchaîne 2 générations).
+  if (versionBadgeTimer) clearTimeout(versionBadgeTimer);
+  const captured = versionTimestamp.value;
+  versionBadgeTimer = setTimeout(() => {
+    if (versionTimestamp.value === captured) {
+      lastCreatedVersion.value = null;
+    }
+    versionBadgeTimer = null;
+  }, 5000);
+}
+
+// Trace le statut du POST /api/prompts (Mission 03 — persistance serveur).
+const promptPostStatus = ref<{ ok: boolean; message: string } | null>(null);
+
 // ── Accordéon "Personnalisation / Paramètres" ──────────────────────────────
 // Exclusion mutuelle : ouvrir l'une replie l'autre. Cliquer sur une section
 // déjà ouverte la referme (les deux peuvent être fermées simultanément).
@@ -238,6 +262,9 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onResultModalKeydown);
+  // Annule les timers pending pour éviter mutation de refs après unmount (recommandation
+  // code-reviewer M04 tâche 4.3 : éviter setTimeout orphelin).
+  if (versionBadgeTimer) clearTimeout(versionBadgeTimer);
 });
 // À l'ouverture du modal, déplace le focus sur le bouton close (a11y).
 watch(resultModalOpen, (open) => {
@@ -343,9 +370,39 @@ async function generate() {
     // 5. Sauvegarde de la version — le prompt compilé devient le `content` à versionner
     if (generated?.id) {
       const compiled = typeof generated.content === 'string' ? generated.content : tpl.template;
-      await versionHandler.createVersion(generated.id, compiled, {
-        changeReason: `Généré via template "${tpl.name}" pour identité ${currentIdentityType.value} (${currentIdentityLabel.value}).`,
+      const createVersionPromise = versionHandler.createVersion(generated.id, compiled, {
+        changeReason: 'Génération initiale',
+        identityType: identity.type,
+        templateId: tpl.id,
       });
+
+      // POST /api/prompts — sérialise le GeneratedPrompt vers la persistence JSON server-side
+      // (Mission 03). On sérialise les Dates en ISO pour respecter le parsePrompt() du endpoint.
+      const postPromptPromise = $fetch('/api/prompts', {
+        method: 'POST',
+        body: JSON.parse(
+          JSON.stringify(generated, (_key, v) => (v instanceof Date ? v.toISOString() : v)),
+        ),
+      }).catch((e: unknown) => {
+        // On ne throw pas — la generation reste valide côté client, seul le POST échoue.
+        promptPostStatus.value = {
+          ok: false,
+          message: `Sauvegarde serveur indisponible : ${e instanceof Error ? e.message : 'erreur inconnue'}`,
+        };
+        setTimeout(() => {
+          if (promptPostStatus.value && !promptPostStatus.value.ok) promptPostStatus.value = null;
+        }, 6000);
+        return null;
+      });
+
+      const [createdVersion] = await Promise.all([createVersionPromise, postPromptPromise]);
+
+      if (createdVersion?.id && createdVersion.version) {
+        showVersionBadge({ id: createdVersion.id, version: createdVersion.version });
+      }
+      // Note : le statut "succès" du POST n'est pas affiché en badge vert — le badge
+      // badge-vert "Version v?.?.? créee" confirme déjà le succès côté utilisateur.
+      // On n'affiche `promptPostStatus` QUE dans son sens négatif (cf. UI ci-dessous).
     }
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Erreur de génération';
@@ -762,6 +819,28 @@ async function generate() {
                 <div class="flex justify-between py-1 border-b border-gray-10">
                   <span class="text-gray-50 text-xs">Identité</span>
                   <span class="text-xs text-gray-70">{{ result.identity?.type }}</span>
+                </div>
+
+                <!-- M04 tâche 4.3 : badge "Version v?.?.? creee" — apparait apres chaque generation. -->
+                <div
+                  v-if="lastCreatedVersion"
+                  class="bg-green-50 border border-green-100 text-green-700 px-2.5 py-1.5 rounded text-xs flex items-center justify-between"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span>
+                    <strong>Version v{{ lastCreatedVersion.version }}</strong> creee
+                    <span class="text-gray-50 ml-1.5">({{ lastCreatedVersion.id.split('-v')[0] }})</span>
+                  </span>
+                </div>
+
+                <!-- M03 : statut du POST /api/prompts (erreur reseau si echec). -->
+                <div
+                  v-if="promptPostStatus && !promptPostStatus.ok"
+                  class="bg-amber-50 border border-amber-100 text-amber-700 px-2.5 py-1.5 rounded text-xs"
+                  role="status"
+                >
+                  {{ promptPostStatus.message }}
                 </div>
                 <div class="pt-2">
                   <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1">Contenu</p>
