@@ -1,0 +1,162 @@
+{
+  "versions": {
+    "demo-prompt-marketing": [
+      {
+        "id": "demo-prompt-marketing-v1",
+        "promptId": "demo-prompt-marketing",
+        "version": "1.0.0",
+        "content": "Rédige un email marketing pour notre nouveau produit. Inclus : sujet accrocheur, bénéfices client, appel à l'action clair. Ton : professionnel mais chaleureux.",
+        "changes": [],
+        "createdAt": "2026-06-10T10:00:00.000Z",
+        "createdBy": "User",
+        "isActive": false,
+        "metadata": {
+          "changeReason": "Modèle initial",
+          "qualityScore": 3.5
+        }
+      },
+      {
+        "id": "demo-prompt-marketing-v2",
+        "promptId": "demo-prompt-marketing",
+        "version": "1.0.1",
+        "content": "Rédige un email marketing pour notre nouveau produit SaaS. Inclus : sujet accrocheur (max 50 caractères), 3 bénéfices client quantifiés, appel à l'action clair avec urgency. Ton : professionnel mais chaleureux. Cible : décideurs B2B.",
+        "changes": [],
+        "createdAt": "2026-06-12T14:30:00.000Z",
+        "createdBy": "User",
+        "isActive": false,
+        "metadata": {
+          "changeReason": "Précision contexte B2B + ajout urgence",
+          "qualityScore": 4.0
+        }
+      },
+      {
+        "id": "demo-prompt-marketing-v3",
+        "promptId": "demo-prompt-marketing",
+        "version": "1.0.2",
+        "content": "Rédige un email marketing pour notre nouveau produit SaaS beta. Inclus : sujet accrocheur (max 50 caractères), 3 bénéfices client quantifiés (ROI, gain de temps, sécurité), offre early-adopter (-30% pendant 14 jours), appel à l'action avec urgency. Ton : professionnel mais chaleureux. Cible : CTOs et VP Engineering dans scale-ups européennes.",
+        "changes": [],
+        "createdAt": "2026-06-15T09:15:00.000Z",
+        "createdBy": "Superviseur",
+        "isActive": true,
+        "metadata": {
+          "changeReason": "Validation Superviseur + ajout offre early-adopter",
+          "qualityScore": 4.5,
+          "performanceMetrics": {
+            "responseTime": 120,
+            "successRate": 0.95,
+            "errorRate": 0.05,
+            "userSatisfaction": 4.5,
+            "usageFrequency": 12
+          }
+        }
+      }
+    ],
+    "demo-prompt-tech-review": [
+      {
+        "id": "demo-prompt-tech-review-v1",
+        "promptId": "demo-prompt-tech-review",
+        "version": "1.0.0",
+        "content": "Effectue une revue de code sur le fichier fourni. Liste les problèmes trouvés (correctness, performance, sécurité) et propose des améliorations concrètes.",
+        "changes": [],
+        "createdAt": "2026-06-08T16:20:00.000Z",
+        "createdBy": "User",
+        "isActive": false,
+        "metadata": {
+          "changeReason": "Première itération",
+          "qualityScore": 3.0
+        }
+      },
+      {
+        "id": "demo-prompt-tech-review-v2",
+        "promptId": "demo-prompt-tech-review",
+        "version": "1.1.0",
+        "content": "Effectue une revue de code approfondie sur le fichier fourni. Structure ta réponse en 3 sections : 1) Problèmes critiques (correctness, sécurité), 2) Améliorations de qualité (patterns, naming, DRY), 3) Optimisations performance. Pour chaque point : cite la ligne, explique le problème, propose le fix avec code exemple.",
+        "changes": [],
+        "createdAt": "2026-06-14T11:45:00.000Z",
+        "createdBy": "User",
+        "isActive": true,
+        "metadata": {
+          "changeReason": "Refonte structure en sections + ajout d'exemples de fix",
+          "qualityScore": 4.2,
+          "performanceMetrics": {
+            "responseTime": 200,
+            "successRate": 0.88,
+            "errorRate": 0.12,
+            "userSatisfaction": 4.0,
+            "usageFrequency": 8
+          }
+        }
+      }
+    ]
+  },
+  "metrics": {
+    "demo-prompt-marketing-1.0.2": {
+      "promptId": "demo-prompt-marketing",
+      "version": "1.0.2",
+      "usageCount": 12,
+      "successfulGenerations": 11,
+      "failedGenerations": 1,
+      "averageResponseTime": 120,
+      "userSatisfactionScore": 4.5,
+      "averageSuccessRate": 0.95,
+      "lastUsed": "2026-06-15T10:30:00.000Z",
+      "createdAt": "2026-06-15T09:15:00.000Z"
+    },
+    "demo-prompt-marketing-1.0.1": {
+      "promptId": "demo-prompt-marketing",
+      "version": "1.0.1",
+      "usageCount": 4,
+      "successfulGenerations": 3,
+      "failedGenerations": 1,
+      "averageResponseTime": 145,
+      "userSatisfactionScore": 3.8,
+      "averageSuccessRate": 0.75,
+      "lastUsed": "2026-06-13T16:00:00.000Z",
+      "createdAt": "2026-06-12T14:30:00.000Z"
+    },
+    "demo-prompt-tech-review-1.1.0": {
+      "promptId": "demo-prompt-tech-review",
+      "version": "1.1.0",
+      "usageCount": 8,
+      "successfulGenerations": 7,
+      "failedGenerations": 1,
+      "averageResponseTime": 200,
+      "userSatisfactionScore": 4.0,
+      "averageSuccessRate": 0.88,
+      "lastUsed": "2026-06-16T14:00:00.000Z",
+      "createdAt": "2026-06-14T11:45:00.000Z"
+    }
+  },
+  "feedback": {
+    "demo-prompt-marketing-1.0.2": [
+      {
+        "userId": "demo-user-1",
+        "rating": 5,
+        "comment": "Très efficace pour engager les CTOs sur la beta.",
+        "timestamp": "2026-06-15T10:30:00.000Z",
+        "helpful": true
+      },
+      {
+        "userId": "demo-user-2",
+        "rating": 4,
+        "comment": "Bon mais un peu court pour des ABM ciblés.",
+        "timestamp": "2026-06-16T09:00:00.000Z",
+        "helpful": true
+      }
+    ],
+    "demo-prompt-tech-review-1.1.0": [
+      {
+        "userId": "demo-user-3",
+        "rating": 4,
+        "comment": "Bonne couverture des patterns, les exemples de fix sont précieux.",
+        "timestamp": "2026-06-16T14:00:00.000Z",
+        "helpful": true
+      }
+    ]
+  },
+  "metadata": {
+    "version": 1,
+    "lastUpdated": "2026-06-20T10:17:00.000Z",
+    "description": "Demo seed for runtime/versions.json — provides realistic version history (2 prompts, 5 versions, 3 feedback entries) on first launch."
+  }
+}

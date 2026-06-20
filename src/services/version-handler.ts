@@ -11,6 +11,31 @@ import type {
   VersionDifference,
 } from '../models/version';
 
+// Options de configuration du VersionHandler (ajouté en Mission 04 — persistance disque).
+export interface VersionHandlerOptions {
+  /**
+   * Chemin du fichier JSON utilisé pour la persistance disque (ex: `runtime/versions.json`).
+   * Si fourni, le service chargera/sauvera les 3 Maps (versions/metrics/feedback) à chaque mutation.
+   * Si absent (défaut), le service reste 100% en RAM (utile pour les tests unitaires).
+   */
+  storagePath?: string;
+}
+
+// Structure sérialisée sur disque (1 fichier = 3 Maps + metadata wrapper).
+// Le wrapper `metadata` est analogue à templates.json / prompts.json — version du
+// schéma, lastUpdated ISO, description lisible. Round-trip conservé via
+// loadFromDisk/saveToDisk pour ne pas perdre le contenu du seed après 1er save.
+export interface VersionStoreSnapshot {
+  versions: Record<string, PromptVersion[]>;
+  metrics: Record<string, VersionUsageMetrics>;
+  feedback: Record<string, UserFeedback[]>;
+  metadata?: {
+    version: number;
+    lastUpdated: string;
+    description?: string;
+  };
+}
+
 export interface VersionUsageMetrics {
   promptId: string;
   version: string;
@@ -55,6 +80,12 @@ export class VersionHandler implements IVersionHandler {
   private versionStore = new Map<string, PromptVersion[]>();
   private metricsStore = new Map<string, VersionUsageMetrics>();
   private feedbackStore = new Map<string, UserFeedback[]>();
+  private readonly storagePath: string | null = null;
+  private diskLoaded = false;
+
+  constructor(options: VersionHandlerOptions = {}) {
+    this.storagePath = options.storagePath ?? null;
+  }
 
   async createVersion(promptId: string, content: string, metadata: VersionMetadata): Promise<PromptVersion> {
     const versions = this.versionStore.get(promptId) || [];
@@ -80,6 +111,7 @@ export class VersionHandler implements IVersionHandler {
 
     // Initialize metrics for new version
     await this.initializeVersionMetrics(promptId, versionNumber);
+    await this.persistSafely();
 
     return newVersion;
   }
@@ -151,6 +183,7 @@ export class VersionHandler implements IVersionHandler {
 
     // Record rollback metrics
     await this.recordRollbackMetrics(promptId, targetVersion);
+    await this.persistSafely();
 
     return targetVersionObj;
   }
@@ -198,6 +231,7 @@ export class VersionHandler implements IVersionHandler {
 
     existing.lastUsed = new Date();
     this.metricsStore.set(key, existing);
+    await this.persistSafely();
   }
 
   async getVersionMetrics(promptId: string, version: string): Promise<PerformanceMetrics> {
@@ -289,6 +323,7 @@ export class VersionHandler implements IVersionHandler {
 
     // Update user satisfaction metrics
     await this.updateSatisfactionMetrics(promptId, version, feedback.rating);
+    await this.persistSafely();
   }
 
   async getVersionFeedback(promptId: string, version: string): Promise<UserFeedback[]> {
@@ -533,5 +568,190 @@ export class VersionHandler implements IVersionHandler {
       );
       this.metricsStore.set(key, metrics);
     }
+  }
+
+  // ─── Persistance disque (Mission 04) ───────────────────────────────────────
+
+  /**
+   * Insère directement un PromptVersion dans versionStore sans passer par
+   * la logique d'incrément / désactivation de createVersion.
+   * Utilisé par POST /api/versions pour persister une version déjà construite côté client.
+   */
+  async storePromptVersion(version: PromptVersion): Promise<PromptVersion> {
+    const existing = this.versionStore.get(version.promptId) || [];
+    // Cohérence avec createVersion() : si la nouvelle version arrive en isActive=true,
+    // désactiver les versions précédentes du même promptId pour préserver l'invariant
+    // `un seul isActive=true par promptId`. Sinon getVersionHistory.currentVersion
+    // serait ambigu (plusieurs actifs).
+    if (version.isActive) {
+      for (const v of existing) {
+        v.isActive = false;
+      }
+    }
+    existing.push(version);
+    this.versionStore.set(version.promptId, existing);
+    await this.persistSafely();
+    return version;
+  }
+
+  /**
+   * Liste toutes les entrées des 3 Maps sous forme d'un snapshot JSON-friendly.
+   * Utilisé par GET /api/versions pour hydrater la page /versions.
+   * Les Maps sont converties en Records ; les valeurs restent des références aux objets du store.
+   */
+  listVersionsAll(): VersionStoreSnapshot {
+    return {
+      versions: Object.fromEntries(this.versionStore),
+      metrics: Object.fromEntries(this.metricsStore),
+      feedback: Object.fromEntries(this.feedbackStore),
+    };
+  }
+
+  /**
+   * Indique si une version avec cet id existe déjà (toutes confondues).
+   * Utilisé par POST /api/versions pour détecter un duplicate et renvoyer 409.
+   */
+  hasVersionById(versionId: string): boolean {
+    for (const versions of this.versionStore.values()) {
+      if (versions.some((v) => v.id === versionId)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Initialise le service depuis le disque si un chemin de stockage est configuré.
+   * Idempotent (la classe se protège contre les doubles-chargements).
+   * En l'absence de `storagePath`, cette méthode est un no-op (mode RAM pur).
+   */
+  async initialize(): Promise<void> {
+    if (this.diskLoaded) return;
+    this.diskLoaded = true;
+    if (this.storagePath) {
+      await this.loadFromDisk();
+    }
+  }
+
+  /**
+   * Indique si la persistance disque est active (un `storagePath` a été fourni).
+   */
+  isPersistenceEnabled(): boolean {
+    return this.storagePath !== null;
+  }
+
+  /**
+   * Wrapper privé pour `saveToDisk()` qui log les erreurs sans throw.
+   */
+  private async persistSafely(): Promise<void> {
+    try {
+      await this.saveToDisk();
+    } catch (diskError) {
+      console.error('[VersionHandler] Failed to save versions to disk:', diskError);
+    }
+  }
+
+  /**
+   * Lit le fichier de stockage, charge les 3 Maps et ravive les Dates.
+   * Si le fichier n'existe pas, copie le seed `runtime/versions.seed.json`.
+   */
+  private async loadFromDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { existsSync, readFileSync, writeFileSync, mkdirSync } = await import('node:fs');
+    const { dirname } = await import('node:path');
+
+    const dir = dirname(this.storagePath);
+    if (dir && !existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
+    if (!existsSync(this.storagePath)) {
+      // Bootstrap : on copie le seed de référence s'il existe, sinon on initialise un store vide.
+      const seedPath = this.storagePath.replace(/versions\.json$/, 'versions.seed.json');
+      if (existsSync(seedPath)) {
+        const seedRaw = readFileSync(seedPath, 'utf-8');
+        writeFileSync(this.storagePath, seedRaw, 'utf-8');
+      } else {
+        const empty: VersionStoreSnapshot = { versions: {}, metrics: {}, feedback: {} };
+        writeFileSync(this.storagePath, JSON.stringify(empty), 'utf-8');
+      }
+    }
+
+    const raw = readFileSync(this.storagePath, 'utf-8');
+    const parsed = JSON.parse(raw) as Partial<VersionStoreSnapshot>;
+
+    if (parsed.versions && typeof parsed.versions === 'object') {
+      for (const [promptId, versionList] of Object.entries(parsed.versions)) {
+        this.versionStore.set(promptId, versionList.map((v) => this.reviveVersionDates(v)));
+      }
+    }
+    if (parsed.metrics && typeof parsed.metrics === 'object') {
+      for (const [key, m] of Object.entries(parsed.metrics)) {
+        this.metricsStore.set(key, this.reviveMetricsDates(m));
+      }
+    }
+    if (parsed.feedback && typeof parsed.feedback === 'object') {
+      for (const [key, fbList] of Object.entries(parsed.feedback)) {
+        this.feedbackStore.set(
+          key,
+          fbList.map((fb) => this.reviveFeedbackDates(fb)),
+        );
+      }
+    }
+  }
+
+  /**
+   * Sérialise les 3 Maps vers le fichier de stockage.
+   * No-op si aucun `storagePath` n'a été configuré.
+   */
+  private async saveToDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { writeFileSync } = await import('node:fs');
+
+    const payload: VersionStoreSnapshot = {
+      versions: Object.fromEntries(this.versionStore),
+      metrics: Object.fromEntries(this.metricsStore),
+      feedback: Object.fromEntries(this.feedbackStore),
+      metadata: {
+        version: 1,
+        lastUpdated: new Date().toISOString(),
+        description: 'Version store snapshot (prompts/versions/metrics/feedback)',
+      },
+    };
+    writeFileSync(this.storagePath, JSON.stringify(payload, null, 2), 'utf-8');
+  }
+
+  /**
+   * Reconstitue les Dates d'un PromptVersion : createdAt + metadata.rollbackInfo.rollbackAt.
+   */
+  private reviveVersionDates(raw: PromptVersion): PromptVersion {
+    const v: PromptVersion = { ...raw, metadata: { ...raw.metadata } };
+    if (typeof v.createdAt === 'string') {
+      v.createdAt = new Date(v.createdAt);
+    }
+    if (v.metadata.rollbackInfo?.rollbackAt && typeof v.metadata.rollbackInfo.rollbackAt === 'string') {
+      v.metadata.rollbackInfo = {
+        ...v.metadata.rollbackInfo,
+        rollbackAt: new Date(v.metadata.rollbackInfo.rollbackAt),
+      };
+    }
+    return v;
+  }
+
+  /**
+   * Reconstitue les Dates d'un VersionUsageMetrics : lastUsed + createdAt.
+   */
+  private reviveMetricsDates(raw: VersionUsageMetrics): VersionUsageMetrics {
+    const m: VersionUsageMetrics = { ...raw };
+    if (typeof m.lastUsed === 'string') m.lastUsed = new Date(m.lastUsed);
+    if (typeof m.createdAt === 'string') m.createdAt = new Date(m.createdAt);
+    return m;
+  }
+
+  /**
+   * Reconstitue les Dates d'un UserFeedback : timestamp.
+   */
+  private reviveFeedbackDates(raw: UserFeedback): UserFeedback {
+    const fb: UserFeedback = { ...raw };
+    if (typeof fb.timestamp === 'string') fb.timestamp = new Date(fb.timestamp);
+    return fb;
   }
 }
