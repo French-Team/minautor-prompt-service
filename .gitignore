@@ -20,3 +20,7 @@ coverage/
 .kiro/
 playwright/
 playwright-report/
+
+# Runtime data store (auto-generated on first run from runtime/templates.seed.json)
+# Contains user-added templates — keep out of git to avoid per-user diffs.
+runtime/templates.json

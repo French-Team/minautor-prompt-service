@@ -165,6 +165,8 @@ Le **pre-commit hook** Husky verifie automatiquement le lint et les tests avant 
 
 ## 🤝 Contribution
 
+> 🇫🇷 **Style de rédaction française** : voir [`docs/FR_STYLE.md`](./docs/FR_STYLE.md) pour la convention (formes standard par défaut, formes inclusives acceptées au choix).
+
 1. 🍴 Forker le projet
 2. 🌿 Creer une branche (`git checkout -b feat/ma-feature`)
 3. 🔧 Coder + valider (`npm run validate` doit passer)

@@ -40,7 +40,8 @@ export const defaultConfig: AppConfig = {
     environment: 'development',
   },
   database: {
-    url: (typeof globalThis !== 'undefined' && globalThis.process?.env?.DATABASE_URL) || 'sqlite://./data/prompts.db',
+    url:
+      (typeof globalThis !== 'undefined' && globalThis.process?.env?.DATABASE_URL) || 'sqlite://./runtime/prompts.db',
     maxConnections: 10,
     timeout: 5000,
   },

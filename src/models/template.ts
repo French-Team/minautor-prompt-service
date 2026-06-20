@@ -2,7 +2,17 @@
 
 import type { UserIdentityType } from './identity';
 
-export type TemplateCategory = 'general' | 'technical' | 'management' | 'quality' | 'optimization';
+export type TemplateCategory =
+  | 'general'
+  | 'technical'
+  | 'architecture'
+  | 'refactoring'
+  | 'quality'
+  | 'security'
+  | 'documentation'
+  | 'devops'
+  | 'management'
+  | 'performance';
 
 export interface TemplateVariable {
   name: string;
@@ -186,7 +196,18 @@ export class TemplateValidator {
     }
 
     // Validate category
-    const validCategories: TemplateCategory[] = ['general', 'technical', 'management', 'quality', 'optimization'];
+    const validCategories: TemplateCategory[] = [
+      'general',
+      'technical',
+      'architecture',
+      'refactoring',
+      'quality',
+      'security',
+      'documentation',
+      'devops',
+      'management',
+      'performance',
+    ];
     if (!validCategories.includes(template.category)) {
       errors.push({
         field: 'category',

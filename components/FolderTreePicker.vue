@@ -19,6 +19,8 @@ const emit = defineEmits<{
 interface DirEntry {
   name: string;
   isDirectory: boolean;
+  volumeName?: string;
+  driveType?: number;
 }
 
 const open = ref(props.modelValue);
@@ -28,11 +30,9 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 
 // Détection du dossier racine selon l'OS
-// Côté serveur : process.platform ; côté client : navigator.userAgent
+// Sur Windows, on utilise un niveau virtuel '__drives__' qui liste les disques disponibles.
 function detectRoot(): string {
-  if (typeof navigator !== 'undefined' && /windows/i.test(navigator.userAgent)) return 'C:\\';
-  if (typeof process !== 'undefined' && (process as { platform: string }).platform === 'win32') return 'C:\\';
-  return '/';
+  return '__drives__';
 }
 
 // Normalise les séparateurs de chemin
@@ -41,20 +41,28 @@ function normalizePath(p: string): string {
 }
 
 // Obtient le dossier parent
+// Sur Windows, le parent d'une racine de disque (C:\) est le niveau '__drives__'
 function parentPath(p: string): string {
   const normalized = normalizePath(p).replace(/\/$/, '');
+  // Niveau '__drives__' → pas de parent
+  if (normalized === '__drives__') return '__drives__';
+  // Racine de disque Windows (C:) → remonter à '__drives__'
+  if (/^[A-Za-z]:$/.test(normalized)) {
+    return '__drives__';
+  }
+  // Racine Linux → pas de parent
+  if (normalized === '') return '/';
   const idx = normalized.lastIndexOf('/');
-  // Si pas de séparateur : racine (/) ou disque Windows
   if (idx <= 0) {
     if (/^[A-Za-z]:$/.test(normalized)) {
-      return normalized + '\\'; // C: → C:\ pour correspondre à detectRoot()
+      return '__drives__';
     }
     return '/';
   }
   const parent = normalized.slice(0, idx);
-  // Les racines Windows (C:) doivent avoir le séparateur pour correspondre à detectRoot()
+  // Les racines Windows (C:) doivent ramener vers '__drives__'
   if (/^[A-Za-z]:$/.test(parent)) {
-    return parent + '\\';
+    return '__drives__';
   }
   return parent;
 }
@@ -62,11 +70,13 @@ function parentPath(p: string): string {
 // Sépare le chemin en segments pour le breadcrumb
 function pathSegments(): string[] {
   const normalized = normalizePath(visiblePath.value).replace(/\/$/, '');
+  // Niveau virtuel '__drives__' → afficher 'Disques'
+  if (normalized === '__drives__') return ['Disques'];
   const parts = normalized.split('/').filter(Boolean);
   // Gère les racines Windows (C:) et Linux (/)
   if (normalized.startsWith('/')) return ['/', ...parts];
   if (parts.length > 0 && parts[0].includes(':')) {
-    return parts.map((p, i) => (i === 0 ? p + '\\' : p));
+    return ['Disques', ...parts.map((p) => (p.includes(':') ? p + '\\' : p))];
   }
   return parts;
 }
@@ -74,6 +84,13 @@ function pathSegments(): string[] {
 // Reconstruit le chemin à partir d'un segment du breadcrumb
 function segmentPath(index: number): string {
   const segs = pathSegments();
+  // Breadcrumb: 'Disques' → '__drives__', puis 'C:\' → 'C:', etc.
+  if (segs[0] === 'Disques') {
+    if (index === 0) return '__drives__';
+    const drive = segs[1];
+    if (drive && drive.includes(':')) return drive.replace('\\', '') + '/';
+    return segs.slice(1, index + 1).join('/');
+  }
   if (segs[0] === '/') {
     return '/' + segs.slice(1, index + 1).join('/');
   }
@@ -104,6 +121,13 @@ async function loadDirectory(dir: string) {
 }
 
 function navigateTo(dirName: string) {
+  // Niveau virtuel '__drives__' : naviguer vers la racine du disque
+  // Important : sur Windows, 'H:' = répertoire courant, 'H:/' = racine
+  if (normalizePath(visiblePath.value) === '__drives__') {
+    const drivePath = dirName.replace(/[\\/]$/, '') + '/';
+    loadDirectory(drivePath);
+    return;
+  }
   const sep = visiblePath.value.endsWith('\\') ? '' : normalizePath(visiblePath.value).includes('/') ? '/' : '\\';
   const newPath =
     visiblePath.value.endsWith('\\') || visiblePath.value.endsWith('/')
@@ -121,7 +145,11 @@ function goToBreadcrumb(index: number) {
 }
 
 function selectFolder(folderPath: string) {
-  emit('select', folderPath);
+  // Normaliser le chemin : barres obliques cohérentes
+  // Préserve la racine Windows (C:\\ → garder le backslash final)
+  const isWinRoot = /^[A-Za-z]:\\$/.test(folderPath);
+  const cleanPath = isWinRoot ? folderPath.replace(/\\/g, '/') : folderPath.replace(/[\\/]+$/, '').replace(/\\/g, '/');
+  emit('select', cleanPath);
   open.value = false;
 }
 
@@ -270,7 +298,10 @@ function formatPath(p: string): string {
                 >
                   <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2Z" />
                 </svg>
-                <span class="text-xs text-gray-70 group-hover:text-gray-90 truncate flex-1">{{ entry.name }}</span>
+                <span class="text-xs text-gray-70 group-hover:text-gray-90 truncate flex-1">
+                  {{ entry.name }}
+                  <span v-if="entry.volumeName" class="text-gray-40 ml-1">({{ entry.volumeName }})</span>
+                </span>
                 <svg
                   class="w-3 h-3 text-gray-30 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   viewBox="0 0 24 24"
@@ -292,7 +323,13 @@ function formatPath(p: string): string {
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <button class="btn-ghost text-xs" @click="open = false">Annuler</button>
-              <button class="btn-ibm text-xs" @click="selectFolder(visiblePath)">Sélectionner</button>
+              <button
+                class="btn-ibm text-xs"
+                :disabled="normalizePath(visiblePath) === '__drives__'"
+                @click="selectFolder(visiblePath)"
+              >
+                Sélectionner
+              </button>
             </div>
           </div>
         </div>

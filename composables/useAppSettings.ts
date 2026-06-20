@@ -42,15 +42,16 @@ function applyCSS(s: AppSettings) {
   const root = document.documentElement;
 
   // Font size scale
-  const scales: Record<FontSize, { base: string; sm: string; xs: string }> = {
-    small: { base: '13px', sm: '12px', xs: '11px' },
-    medium: { base: '14px', sm: '13px', xs: '12px' },
-    large: { base: '15px', sm: '14px', xs: '13px' },
+  const scales: Record<FontSize, { base: string; sm: string; xs: string; lg: string }> = {
+    small: { base: '13px', sm: '12px', xs: '11px', lg: '18px' },
+    medium: { base: '14px', sm: '13px', xs: '12px', lg: '20px' },
+    large: { base: '15px', sm: '14px', xs: '13px', lg: '22px' },
   };
   const scale = scales[s.fontSize];
   root.style.setProperty('--fs-base', scale.base);
   root.style.setProperty('--fs-sm', scale.sm);
   root.style.setProperty('--fs-xs', scale.xs);
+  root.style.setProperty('--fs-lg', scale.lg);
 
   // Card density
   root.style.setProperty('--card-px', s.cardDensity === 'compact' ? '16px' : '20px');

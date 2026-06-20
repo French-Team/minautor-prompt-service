@@ -1,23 +1,27 @@
 <script setup lang="ts">
-import { createMockTemplate } from '~/composables/usePromptSystem';
+import type { PromptTemplate, TemplateCategory } from '~/src/models/template';
+
+type IdentityType = 'User' | 'Superviseur' | 'Responsable';
+
+export interface TemplateEntry {
+  id: string;
+  name: string;
+  description: string;
+  category: TemplateCategory | string;
+  identities: IdentityType[] | string[];
+  template: string;
+  variables: { name: string; type: string; required: boolean; description?: string }[];
+  version: string;
+  usageCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 const emit = defineEmits<{
   selected: [templateId: string];
   created: [template: TemplateEntry];
   deleted: [templateId: string];
 }>();
-
-interface TemplateEntry {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  identities: string[];
-  template: string;
-  variables: { name: string; type: string; required: boolean }[];
-  version: string;
-  usageCount: number;
-}
 
 withDefaults(
   defineProps<{
@@ -34,6 +38,8 @@ withDefaults(
   },
 );
 
+const LOCAL_STORAGE_KEY = 'templates-cache-v1';
+
 const templates = ref<TemplateEntry[]>([]);
 const search = ref('');
 const filterCategory = ref<string>('all');
@@ -44,12 +50,10 @@ const error = ref<string | null>(null);
 const draft = reactive({
   name: '',
   description: '',
-  category: 'general',
-  identities: ['User', 'Superviseur', 'Responsable'] as string[],
+  category: 'general' as TemplateCategory | string,
+  identities: ['User', 'Superviseur', 'Responsable'] as IdentityType[],
   template: '',
 });
-
-// Liste vide au démarrage — l'utilisateur crée ses templates
 
 const filtered = computed(() =>
   templates.value.filter((t) => {
@@ -63,41 +67,113 @@ const filtered = computed(() =>
   }),
 );
 
-function addTemplate() {
+// Charge les templates depuis l'API serveur. Fallback localStorage si l'API échoue.
+async function loadTemplates() {
+  loading.value = true;
+  error.value = null;
+  try {
+    const data = await $fetch<TemplateEntry[]>('/api/templates');
+    templates.value = data || [];
+    if (import.meta.client) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(templates.value));
+      } catch {
+        // Storage plein ou indisponible — on ignore, l'API est la source de vérité.
+      }
+    }
+  } catch (e: unknown) {
+    error.value = `Chargement serveur indisponible : ${e instanceof Error ? e.message : 'erreur inconnue'}`;
+    // Fallback localStorage pour ne pas perdre la vue offline
+    if (import.meta.client) {
+      try {
+        const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (cached) {
+          templates.value = JSON.parse(cached) as TemplateEntry[];
+        }
+      } catch {
+        // Ignore — cache corrompu, on reste sur la liste vide.
+      }
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Construit la payload PromptTemplate côté client avant envoi à l'API.
+function buildPromptTemplate(): PromptTemplate {
+  const now = new Date();
+  return {
+    id: `tpl-${Date.now()}`,
+    name: draft.name.trim(),
+    description: draft.description.trim() || draft.name.trim(),
+    category: draft.category as TemplateCategory,
+    identities: [...draft.identities],
+    template: draft.template,
+    variables: extractVariables(draft.template),
+    constraints: [],
+    version: '1.0.0',
+    isPublic: true,
+    author: 'user',
+    createdAt: now,
+    updatedAt: now,
+    usageCount: 0,
+  };
+}
+
+async function addTemplate() {
   error.value = null;
   if (!draft.name.trim() || !draft.template.trim()) {
     error.value = 'Nom et contenu sont obligatoires.';
     return;
   }
-  const newTpl: TemplateEntry = {
-    ...(createMockTemplate(`tpl-${Date.now()}`) as unknown as TemplateEntry),
-    name: draft.name,
-    description: draft.description,
-    category: draft.category,
-    identities: [...draft.identities],
-    template: draft.template,
-    usageCount: 0,
-  };
-  templates.value.push(newTpl);
-  emit('created', newTpl);
-  showCreate.value = false;
-  Object.assign(draft, {
-    name: '',
-    description: '',
-    template: '',
-    category: 'general',
-    identities: ['User', 'Superviseur', 'Responsable'],
-  });
+  try {
+    const created = await $fetch<TemplateEntry>('/api/templates', {
+      method: 'POST',
+      body: buildPromptTemplate(),
+    });
+    templates.value.push(created);
+    emit('created', created);
+    showCreate.value = false;
+    Object.assign(draft, {
+      name: '',
+      description: '',
+      template: '',
+      category: 'general',
+      identities: ['User', 'Superviseur', 'Responsable'] as IdentityType[],
+    });
+  } catch (e: unknown) {
+    error.value = `Création échouée : ${e instanceof Error ? e.message : 'erreur inconnue'}`;
+  }
 }
 
-function removeTemplate(id: string) {
-  templates.value = templates.value.filter((t) => t.id !== id);
-  emit('deleted', id);
+async function removeTemplate(id: string) {
+  try {
+    await $fetch(`/api/templates/${id}`, { method: 'DELETE' });
+    templates.value = templates.value.filter((t) => t.id !== id);
+    emit('deleted', id);
+  } catch (e: unknown) {
+    error.value = `Suppression échouée : ${e instanceof Error ? e.message : 'erreur inconnue'}`;
+  }
 }
 
 function selectTemplate(id: string) {
   emit('selected', id);
 }
+
+// Extrait les variables `{{var}}` d'un template pour pré-remplir le tableau `variables`
+// du PromptTemplate (best-effort — le serveur valide de toute façon).
+function extractVariables(templateContent: string) {
+  const matches = templateContent.match(/\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g) || [];
+  const names = Array.from(new Set(matches.map((m) => m.replace(/[{}\s]/g, ''))));
+  return names.map((name) => ({
+    name,
+    type: 'string' as const,
+    required: true,
+    description: `Variable ${name}`,
+  }));
+}
+
+onMounted(loadTemplates);
 </script>
 
 <template>

@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "version": 2,
+    "lastUpdated": "2026-06-20T12:00:00.000Z",
+    "comment": "Identités enrichies par catégorie. Le mapping runtimeProfile (parmi 'User' | 'Superviseur' | 'Responsable') permet de réutiliser les 3 IdentityStrategy existantes sans dupliquer la logique permission/profile."
+  },
+  "categories": [
+    {
+      "id": "standard",
+      "label": "Standard",
+      "order": 1,
+      "identities": [
+        {
+          "id": "User",
+          "label": "User",
+          "description": "Utilisateur standard avec accès de base (lecture + templates).",
+          "runtimeProfile": "User"
+        },
+        {
+          "id": "Superviseur",
+          "label": "Superviseur",
+          "description": "Superviseur avec capacités d'optimisation et de revue.",
+          "runtimeProfile": "Superviseur"
+        },
+        {
+          "id": "Responsable",
+          "label": "Responsable",
+          "description": "Responsable projet avec contrôle qualité et validation.",
+          "runtimeProfile": "Responsable"
+        }
+      ]
+    },
+    {
+      "id": "technical",
+      "label": "Métiers techniques",
+      "order": 2,
+      "identities": [
+        {
+          "id": "Architecte",
+          "label": "Architecte",
+          "description": "Conception et choix techniques (vision haut niveau).",
+          "runtimeProfile": "Superviseur"
+        },
+        {
+          "id": "Developpeur",
+          "label": "Développeur",
+          "description": "Implémentation et tests unitaires au quotidien.",
+          "runtimeProfile": "User"
+        },
+        {
+          "id": "TesteurQA",
+          "label": "Testeur QA",
+          "description": "Stratégie de test, validation et recettes.",
+          "runtimeProfile": "Superviseur"
+        },
+        {
+          "id": "DevOps",
+          "label": "DevOps",
+          "description": "CI/CD, infrastructure et opérations.",
+          "runtimeProfile": "Superviseur"
+        }
+      ]
+    },
+    {
+      "id": "business",
+      "label": "Gestion de projet",
+      "order": 3,
+      "identities": [
+        {
+          "id": "ChefProjet",
+          "label": "Chef de projet",
+          "description": "Coordination, livraison et suivi opérationnel.",
+          "runtimeProfile": "Responsable"
+        },
+        {
+          "id": "ProductOwner",
+          "label": "Product Owner",
+          "description": "Vision produit, backlog et priorisation.",
+          "runtimeProfile": "Responsable"
+        }
+      ]
+    }
+  ]
+}

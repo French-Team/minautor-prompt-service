@@ -40,6 +40,15 @@ export interface TemplateStorageOptions {
   trackMetrics?: boolean;
 }
 
+export interface TemplateLibraryServiceOptions {
+  /**
+   * Chemin du fichier JSON utilisé pour la persistance disque (ex: `runtime/templates.json`).
+   * Si fourni, le service chargera/sauvera les templates dans ce fichier à chaque mutation.
+   * Si absent, le service reste 100% en RAM (utile pour les tests unitaires).
+   */
+  storagePath?: string;
+}
+
 export interface TemplateLibraryStats {
   totalTemplates: number;
   publicTemplates: number;
@@ -73,9 +82,109 @@ export class TemplateLibraryService {
     byKeyword: {},
   };
   private usageMetrics = new Map<string, TemplateUsageMetrics>();
+  private readonly storagePath: string | null = null;
+  private diskLoaded = false;
 
-  constructor() {
+  constructor(options: TemplateLibraryServiceOptions = {}) {
+    this.storagePath = options.storagePath ?? null;
     this.initializeSearchIndex();
+  }
+
+  /**
+   * Initialise le service depuis le disque si un chemin de stockage est configuré.
+   * À appeler une seule fois (la classe se protège contre les doubles-chargements).
+   * En l'absence de `storagePath`, cette méthode est un no-op (mode RAM pur).
+   */
+  async initialize(): Promise<void> {
+    if (this.diskLoaded) return;
+    this.diskLoaded = true;
+    if (this.storagePath) {
+      await this.loadFromDisk();
+    }
+  }
+
+  /**
+   * Lit le fichier de stockage, charge les templates en mémoire et peuple l'index de recherche.
+   * Si le fichier n'existe pas, crée un fichier de seeds à partir de `runtime/templates.seed.json`
+   * (copié dans le fichier cible). Idempotent : peut être appelé plusieurs fois.
+   */
+  private async loadFromDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { existsSync, readFileSync, writeFileSync, mkdirSync } = await import('node:fs');
+    const { dirname } = await import('node:path');
+
+    const dir = dirname(this.storagePath);
+    if (dir && !existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
+    if (!existsSync(this.storagePath)) {
+      // Seed initial depuis le fichier de référence commit-git
+      const seedPath = this.storagePath.replace(/templates\.json$/, 'templates.seed.json');
+      if (existsSync(seedPath)) {
+        const seedRaw = readFileSync(seedPath, 'utf-8');
+        writeFileSync(this.storagePath, seedRaw, 'utf-8');
+      } else {
+        // Pas de seed disponible : on démarre avec un store vide
+        writeFileSync(
+          this.storagePath,
+          JSON.stringify({ templates: {}, metadata: { version: 1, lastUpdated: new Date().toISOString() } }),
+          'utf-8',
+        );
+      }
+    }
+
+    const raw = readFileSync(this.storagePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { templates?: Record<string, PromptTemplate>; metadata?: unknown };
+
+    if (parsed.templates && typeof parsed.templates === 'object') {
+      for (const [id, raw] of Object.entries(parsed.templates)) {
+        const tpl = this.reviveTemplateDates(raw);
+        this.templates.set(id, tpl);
+        this.addToSearchIndex(tpl);
+      }
+    }
+  }
+
+  /**
+   * Sérialise la Map courante vers le fichier de stockage.
+   * No-op si aucun `storagePath` n'a été configuré.
+   */
+  private async saveToDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { writeFileSync } = await import('node:fs');
+
+    const payload = {
+      templates: Object.fromEntries(this.templates),
+      metadata: {
+        version: 1,
+        lastUpdated: new Date().toISOString(),
+      },
+    };
+    writeFileSync(this.storagePath, JSON.stringify(payload, null, 2), 'utf-8');
+  }
+
+  /**
+   * Reconstitue des objets `Date` à partir de chaînes ISO après désérialisation JSON.
+   * Traite `createdAt` et `updatedAt` (PromptTemplate) — les autres champs restent tels quels.
+   */
+  private reviveTemplateDates(raw: PromptTemplate): PromptTemplate {
+    const tpl: PromptTemplate = { ...raw };
+    if (typeof tpl.createdAt === 'string') {
+      tpl.createdAt = new Date(tpl.createdAt);
+    }
+    if (typeof tpl.updatedAt === 'string') {
+      tpl.updatedAt = new Date(tpl.updatedAt);
+    }
+    return tpl;
+  }
+
+  /**
+   * Indique si la persistance disque est active (un `storagePath` a été fourni).
+   * Utile pour les logs/diagnostics et pour les tests d'intégration côté serveur.
+   */
+  isPersistenceEnabled(): boolean {
+    return this.storagePath !== null;
   }
 
   /**
@@ -129,6 +238,16 @@ export class TemplateLibraryService {
           lastUsed: new Date(),
           popularVariables: {},
         });
+      }
+
+      // Persist on disk after a successful store (only if persistence is enabled)
+      if (this.storagePath) {
+        try {
+          await this.saveToDisk();
+        } catch (diskError) {
+          console.error('[TemplateLibraryService] Failed to save template to disk:', diskError);
+          // The in-memory mutation succeeded — the disk error is logged but does not break the API response.
+        }
       }
 
       return success(undefined);
@@ -216,6 +335,15 @@ export class TemplateLibraryService {
       // Store updated template
       this.templates.set(templateId, updatedTemplate);
 
+      // Persist on disk after a successful update (only if persistence is enabled)
+      if (this.storagePath) {
+        try {
+          await this.saveToDisk();
+        } catch (diskError) {
+          console.error('[TemplateLibraryService] Failed to save updated template to disk:', diskError);
+        }
+      }
+
       return success(undefined);
     } catch (error) {
       return failure(
@@ -246,6 +374,15 @@ export class TemplateLibraryService {
       // Remove template and metrics
       this.templates.delete(templateId);
       this.usageMetrics.delete(templateId);
+
+      // Persist on disk after a successful delete (only if persistence is enabled)
+      if (this.storagePath) {
+        try {
+          await this.saveToDisk();
+        } catch (diskError) {
+          console.error('[TemplateLibraryService] Failed to save deletion to disk:', diskError);
+        }
+      }
 
       return success(undefined);
     } catch (error) {
@@ -435,7 +572,18 @@ export class TemplateLibraryService {
       };
 
       // Calculate category counts
-      const categories: TemplateCategory[] = ['general', 'technical', 'management', 'quality', 'optimization'];
+      const categories: TemplateCategory[] = [
+        'general',
+        'technical',
+        'architecture',
+        'refactoring',
+        'quality',
+        'security',
+        'documentation',
+        'devops',
+        'management',
+        'performance',
+      ];
       categories.forEach((category) => {
         stats.categoryCounts[category] = templates.filter((t) => t.category === category).length;
       });
@@ -1047,7 +1195,18 @@ export class TemplateLibraryService {
   // Private helper methods
 
   private initializeSearchIndex(): void {
-    const categories: TemplateCategory[] = ['general', 'technical', 'management', 'quality', 'optimization'];
+    const categories: TemplateCategory[] = [
+      'general',
+      'technical',
+      'architecture',
+      'refactoring',
+      'quality',
+      'security',
+      'documentation',
+      'devops',
+      'management',
+      'performance',
+    ];
     const identities: UserIdentityType[] = ['User', 'Superviseur', 'Responsable'];
 
     this.searchIndex = {

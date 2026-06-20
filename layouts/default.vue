@@ -5,13 +5,37 @@ const route = useRoute();
 useAppSettings();
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: 'home' },
-  { to: '/prompts', label: 'Prompts', icon: 'sparkles' },
-  { to: '/templates', label: 'Templates', icon: 'stack' },
+  { to: '/context', label: 'Projet', icon: 'cube' },
   { to: '/identities', label: 'Identités', icon: 'users' },
-  { to: '/context', label: 'Contexte', icon: 'cube' },
+  { to: '/templates', label: 'Templates', icon: 'stack' },
+  { to: '/prompts', label: 'Prompts', icon: 'sparkles' },
   { to: '/versions', label: 'Versions', icon: 'clock' },
+  { to: '/', label: 'Dashboard', icon: 'home' },
 ];
+
+// On conserve le dossier de travail dans l'URL pour que toutes les pages
+// puissent l'exploiter en SSR via ?folder=
+const activeFolder = computed(() => {
+  const fromRoute = route.query.folder as string | undefined;
+  if (fromRoute) return fromRoute;
+  if (import.meta.client) {
+    return localStorage.getItem('work-folder') || undefined;
+  }
+  return undefined;
+});
+
+// Seules les pages autres que 'Projet' portent le ?folder= dans leur lien.
+// La page Projet gère elle-même le dossier via SSR + localStorage.
+const navItemsWithFolder = computed(() =>
+  navItems.map((item) => {
+    if (!activeFolder.value || item.to === '/context') return item;
+    const separator = item.to.includes('?') ? '&' : '?';
+    return {
+      ...item,
+      to: `${item.to}${separator}folder=${encodeURIComponent(activeFolder.value)}`,
+    };
+  }),
+);
 
 const iconPaths: Record<string, string> = {
   home: 'M3 12 12 3l9 9M5 10v10h14V10',
@@ -34,19 +58,29 @@ const iconPaths: Record<string, string> = {
       class="shrink-0 bg-white border-r border-gray-20 flex flex-col transition-all duration-200"
       :style="{ width: `var(--sidebar-w, 224px)` }"
     >
-      <div class="h-11 flex items-center gap-2 px-4 border-b border-gray-20">
-        <div class="w-2 h-2 rounded-sm bg-ibm-60" />
-        <span class="text-sm font-semibold text-gray-90 tracking-tight">Prompts</span>
-        <span class="ml-auto text-[10px] text-gray-40 font-medium">v1</span>
+      <div class="flex flex-col px-4 py-2 border-b border-gray-20">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-sm bg-ibm-60 shrink-0" />
+          <div class="leading-tight">
+            <span class="text-sm font-semibold text-gray-90 tracking-tight block">Minautor</span>
+            <span class="text-xs font-semibold text-gray-70 tracking-tight block">Prompts Service</span>
+          </div>
+          <span class="ml-auto text-[10px] text-gray-40 font-medium">v1</span>
+        </div>
+        <p class="text-[10px] text-gray-40 mt-1 leading-tight">Générateur de prompts intelligents</p>
       </div>
 
       <nav class="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         <NuxtLink
-          v-for="item in navItems"
+          v-for="item in navItemsWithFolder"
           :key="item.to"
           :to="item.to"
           class="nav-link"
-          :class="route.path === item.to ? 'nav-link-active' : 'nav-link-inactive'"
+          :class="
+            route.path === (typeof item.to === 'string' ? item.to.split('?')[0] : item.to)
+              ? 'nav-link-active'
+              : 'nav-link-inactive'
+          "
         >
           <svg
             class="w-4 h-4 shrink-0"

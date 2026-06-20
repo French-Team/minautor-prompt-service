@@ -8,13 +8,21 @@ definePageMeta({
   keepalive: true,
 });
 
-const { identityResolver, contextAnalyzer, isDegradedMode } = usePromptSystem();
+const { identityResolver, contextAnalyzer, setWorkFolder } = usePromptSystem();
+const route = useRoute();
+
+// SSR : si un dossier est passé via ?folder=, l'appliquer au context analyzer
+if (import.meta.server) {
+  const folderParam = route.query.folder as string | undefined;
+  if (folderParam) {
+    setWorkFolder(folderParam);
+  }
+}
 
 const identity = ref<UserIdentity | null>(null);
 const context = ref<ProjectContext | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const degraded = isDegradedMode();
 
 onMounted(async () => {
   try {
@@ -36,22 +44,6 @@ onMounted(async () => {
         <p class="text-xs text-gray-50 mt-0.5">Vue d'ensemble du système de prompts.</p>
       </div>
     </div>
-
-    <!-- Badge mode dégradé (client-only pour éviter hydration mismatch) -->
-    <ClientOnly>
-      <div
-        v-if="degraded && !error"
-        class="bg-amber-50 border border-amber-100 text-amber-700 px-3 py-2 rounded text-xs mb-4 flex items-center gap-2"
-      >
-        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <span
-          ><strong>Mode dégradé :</strong> certaines données sont limitées (affichage côté client). Les analyses FS
-          réelles sont disponibles en SSR.</span
-        >
-      </div>
-    </ClientOnly>
 
     <div v-if="error" class="bg-red-50 border border-red-100 text-red-700 px-3 py-2 rounded text-xs mb-4">
       {{ error }}

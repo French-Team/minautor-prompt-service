@@ -2,76 +2,19 @@
 import { usePromptSystem } from '~/composables/usePromptSystem';
 import type { ProjectContext, FlowState } from '~/src/models/context';
 
-const { contextAnalyzer, isDegradedMode, setWorkFolder, clearCache, validateFolder } = usePromptSystem();
+const route = useRoute();
+const { contextAnalyzer, setWorkFolder, clearCache } = usePromptSystem();
 
-// useState permet de partager les données SSR → client sans hydration mismatch
 const context = useState<ProjectContext | null>('context', () => null);
 const flowState = useState<FlowState | null>('flowState', () => null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const workFolderInput = ref('');
-const workFolderSaved = ref(false);
-const workFolderError = ref<string | null>(null);
 const showFolderPicker = ref(false);
 
-// Mode forcé : null = auto, 'degraded' = forcer mode dégradé, 'ssr' = forcer mode SSR
-const forceMode = ref<string | null>(null);
-
-const degraded = computed(() => {
-  if (forceMode.value === 'degraded') return true;
-  if (forceMode.value === 'ssr') return false;
-  return isDegradedMode();
-});
-
-onMounted(() => {
-  const saved = localStorage.getItem('work-folder');
-  if (saved) {
-    workFolderInput.value = saved;
-    setWorkFolder(saved);
-  }
-  // Restaurer le mode forcé
-  const savedMode = localStorage.getItem('force-mode');
-  if (savedMode === 'degraded' || savedMode === 'ssr') {
-    forceMode.value = savedMode;
-  }
-});
-
-function toggleForceMode() {
-  if (forceMode.value === null) {
-    forceMode.value = 'degraded';
-  } else if (forceMode.value === 'degraded') {
-    forceMode.value = 'ssr';
-  } else {
-    forceMode.value = null;
-  }
-  localStorage.setItem('force-mode', forceMode.value || '');
-}
-
-function onFolderSelected(path: string) {
-  workFolderInput.value = path;
-  showFolderPicker.value = false;
-  saveWorkFolder();
-}
-
-async function saveWorkFolder() {
-  const path = workFolderInput.value.trim();
-  if (!path) return;
-
-  workFolderError.value = null;
-  const exists = await validateFolder(path);
-  if (!exists) {
-    workFolderError.value = "Ce dossier n'existe pas. Vérifie le chemin et réessaie.";
-    return;
-  }
-
-  setWorkFolder(path);
-  localStorage.setItem('work-folder', path);
-  workFolderSaved.value = true;
-  setTimeout(() => {
-    workFolderSaved.value = false;
-  }, 2000);
-  analyze();
-}
+// Le dossier de travail est transmis via query param ?folder=
+// Ainsi l'analyse se fait toujours en SSR avec le vrai filesystem.
+const folderParam = computed(() => route.query.folder as string | undefined);
 
 async function analyze() {
   loading.value = true;
@@ -84,44 +27,88 @@ async function analyze() {
     error.value = e instanceof Error ? e.message : "Erreur lors de l'analyse du contexte";
   } finally {
     loading.value = false;
-    // DEBUG : expose l'état du composant pour les tests e2e pisteurs
-    if (import.meta.client) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).__DEBUG_CONTEXT = {
-        context: context.value
-          ? {
-              workFolder: {
-                path: context.value.workFolder.path,
-                name: context.value.workFolder.name,
-                type: context.value.workFolder.type,
-                technologies: context.value.workFolder.technologies,
-                technologiesCount: context.value.workFolder.technologies.length,
-              },
-              activeFlowsCount: context.value.activeFlows?.length ?? 0,
-              availableToolsCount: context.value.availableTools?.length ?? 0,
-            }
-          : null,
-        error: error.value,
-        loading: loading.value,
-        degraded: degraded.value,
-        // Metadata pour le pistage
-        _meta: {
-          timestamp: Date.now(),
-          userAgent: navigator.userAgent,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          hasProcessCwd: typeof process !== 'undefined' && typeof (process as any).cwd === 'function',
-        },
-      };
-    }
   }
 }
 
-// PDC : Pister → analyse SSR avec vrai fs, skip client si dégradé pour protéger les données
+// SSR : analyse uniquement si un dossier est passé via ?folder=
+// Pas d'analyse automatique du projet racine.
 if (import.meta.server) {
-  await analyze();
+  if (folderParam.value) {
+    workFolderInput.value = folderParam.value;
+    setWorkFolder(folderParam.value);
+    await analyze();
+  } else {
+    // Réinitialiser l'override pour la prochaine requête
+    setWorkFolder('');
+    context.value = null;
+    flowState.value = null;
+  }
 }
-if (import.meta.client && !degraded.value) {
-  onMounted(analyze);
+
+// Client : pas de ré-analyse (les données SSR sont suffisantes).
+// Si un dossier est sauvegardé mais pas dans l'URL → recharger avec le paramètre
+onMounted(() => {
+  const saved = localStorage.getItem('work-folder');
+  const currentFolder = route.query.folder as string | undefined;
+
+  if (saved && saved !== currentFolder) {
+    // Rechargement complet SSR avec le dossier sauvegardé
+    window.location.href = '/context?folder=' + encodeURIComponent(saved);
+    return;
+  }
+
+  if (saved) {
+    workFolderInput.value = saved;
+  }
+
+  // DEBUG
+  if (import.meta.client) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__DEBUG_CONTEXT = {
+      context: context.value
+        ? {
+            workFolder: {
+              path: context.value.workFolder.path,
+              name: context.value.workFolder.name,
+              type: context.value.workFolder.type,
+              technologies: context.value.workFolder.technologies,
+              technologiesCount: context.value.workFolder.technologies.length,
+            },
+            activeFlowsCount: context.value.activeFlows?.length ?? 0,
+            availableToolsCount: context.value.availableTools?.length ?? 0,
+            projectState: {
+              phase: context.value.projectState.phase,
+              features: context.value.projectState.activeFeatures,
+              completion: context.value.projectState.completionPercentage,
+            },
+            ecosystem: {
+              framework: context.value.technicalEcosystem.framework,
+              language: context.value.technicalEcosystem.language,
+              dependenciesCount: context.value.technicalEcosystem.dependencies.length,
+            },
+          }
+        : null,
+      error: error.value,
+      loading: loading.value,
+      _meta: { timestamp: Date.now() },
+    };
+  }
+});
+
+function onFolderSelected(path: string) {
+  showFolderPicker.value = false;
+  localStorage.setItem('work-folder', path);
+  // Rechargement SSR complet avec le dossier choisi
+  window.location.href = '/context?folder=' + encodeURIComponent(path);
+}
+
+function clearSavedFolder() {
+  localStorage.removeItem('work-folder');
+  window.location.href = '/context';
+}
+
+function refresh() {
+  window.location.reload();
 }
 
 const statusBadge = (s: string) => {
@@ -144,54 +131,18 @@ const statusBadge = (s: string) => {
   <div class="max-w-5xl">
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h1 class="text-lg font-semibold text-gray-90">Contexte</h1>
-        <p class="text-xs text-gray-50 mt-0.5">Analyse du dossier de travail, flows et écosystème.</p>
+        <h1 class="text-lg font-semibold text-gray-90">Projet</h1>
+        <p class="text-xs text-gray-50 mt-0.5">Sélectionne et explore un projet cible.</p>
       </div>
-      <button :disabled="loading" class="btn-ibm text-xs" @click="analyze">
+      <button :disabled="loading" class="btn-ibm text-xs" @click="refresh">
         {{ loading ? 'Analyse…' : 'Réanalyser' }}
       </button>
     </div>
 
     <!-- Configuration du dossier de travail -->
     <div class="card mb-4">
-      <div class="card-header flex items-center justify-between">
-        <h2 class="text-xs font-semibold text-gray-80">Dossier de travail</h2>
-        <!-- Toggle mode dégradé/SSR -->
-        <button
-          class="flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded transition-colors"
-          :class="{
-            'bg-amber-50 text-amber-700': !forceMode,
-            'bg-red-50 text-red-700': forceMode === 'degraded',
-            'bg-blue-50 text-blue-700': forceMode === 'ssr',
-          }"
-          :title="
-            forceMode === 'degraded'
-              ? 'Forcé: mode dégradé'
-              : forceMode === 'ssr'
-                ? 'Forcé: SSR'
-                : 'Auto: détection automatique'
-          "
-          @click="toggleForceMode"
-        >
-          <svg v-if="!forceMode" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <svg
-            v-else-if="forceMode === 'degraded'"
-            class="w-3 h-3"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-          <svg v-else class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 3v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3M5 3l1.5-1.5h11L21 3M5 3h16M9 7h6M9 11h6M9 15h4" />
-          </svg>
-          <span>{{ !forceMode ? 'Auto' : forceMode === 'degraded' ? 'Dégradé' : 'SSR' }}</span>
-        </button>
+      <div class="card-header">
+        <h2 class="text-xs font-semibold text-gray-80">Projet cible</h2>
       </div>
       <div class="card-body">
         <div class="flex items-center gap-2">
@@ -201,6 +152,7 @@ const statusBadge = (s: string) => {
               type="text"
               placeholder="Chemin du dossier (ex: /home/user/project)"
               class="input-field text-xs w-full pr-9"
+              readonly
             />
             <button
               class="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded text-gray-40 hover:text-ibm-60 hover:bg-gray-10 transition-colors"
@@ -219,31 +171,30 @@ const statusBadge = (s: string) => {
                 <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2Z" />
               </svg>
             </button>
+            <button
+              v-if="folderParam"
+              class="absolute right-7 top-1/2 -translate-y-1/2 p-1 rounded text-gray-30 hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Réinitialiser le dossier"
+              @click="clearSavedFolder"
+            >
+              <svg
+                class="w-3 h-3"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
-        <div v-if="workFolderError" class="text-xs text-red-600 mt-1">{{ workFolderError }}</div>
-        <div v-if="workFolderSaved" class="text-xs text-green-600 mt-1">✓ Dossier enregistré</div>
       </div>
 
       <!-- Folder tree picker modal -->
       <FolderTreePicker v-model="showFolderPicker" :current-path="workFolderInput" @select="onFolderSelected" />
     </div>
-
-    <!-- Badge mode dégradé (client-only pour éviter hydration mismatch) -->
-    <ClientOnly>
-      <div
-        v-if="degraded && !error"
-        class="bg-amber-50 border border-amber-100 text-amber-700 px-3 py-2 rounded text-xs mb-4 flex items-center gap-2"
-      >
-        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <span
-          ><strong>Mode dégradé :</strong> certaines données sont limitées (affichage côté client). Les analyses FS
-          réelles sont disponibles en SSR.</span
-        >
-      </div>
-    </ClientOnly>
 
     <div v-if="error" class="bg-red-50 border border-red-100 text-red-700 px-3 py-2 rounded text-xs mb-4">
       {{ error }}
@@ -251,10 +202,28 @@ const statusBadge = (s: string) => {
 
     <div v-if="loading" class="text-xs text-gray-50 py-4">Analyse en cours…</div>
 
-    <div v-if="context" class="grid grid-cols-2 gap-3">
+    <!-- État vide : aucun projet sélectionné -->
+    <div v-if="!folderParam" class="flex flex-col items-center justify-center py-16 text-center">
+      <svg
+        class="w-12 h-12 text-gray-30 mb-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2Z" />
+      </svg>
+      <p class="text-sm text-gray-50 mb-1">Aucun projet sélectionné</p>
+      <p class="text-xs text-gray-40 mb-4">Sélectionne un dossier de projet pour voir ses informations.</p>
+      <button class="btn-ibm text-xs" @click="showFolderPicker = true">Choisir un dossier</button>
+    </div>
+
+    <div v-if="context && folderParam" class="grid grid-cols-2 gap-3">
       <!-- Dossier -->
       <div class="card">
-        <div class="card-header"><h2 class="text-xs font-semibold text-gray-80">Dossier de travail</h2></div>
+        <div class="card-header"><h2 class="text-xs font-semibold text-gray-80">Informations du projet</h2></div>
         <div class="card-body space-y-1.5 text-sm">
           <div class="flex justify-between py-1 border-b border-gray-10">
             <span class="text-gray-50 text-xs">Chemin</span>

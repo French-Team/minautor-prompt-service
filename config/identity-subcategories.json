@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "version": 3,
+    "lastUpdated": "2026-06-20T14:00:00.000Z",
+    "comment": "Taxonomie v3 avec orthogonalite durcie : 'optimization' est scinde en 'refactoring' (Clean code local / Dette technique - angulaire sur le code lui-meme) et 'performance' (Perf / Observabilite / Monitoring cloud - angulaire sur la vitesse et les ressources). Cette separation evite que 'optimization' designe a la fois du refactoring et de la perf. Les 9 identites gardent 3 a 5 sous-categories semantiquement distinctes (labels orientes metier, ids partages permettent plusieurs activites dans la meme categorie de filtre). Cascade : identite -> sous-categorie -> templates filtres (template.category === sous-categorie). Superviseur beneficie de la scission (gagne 1 option, passe de 4 a 5)."
+  },
+  "byIdentity": {
+    "User": [
+      { "id": "technical", "label": "Implementation", "description": "Generation et assistance au code" },
+      { "id": "refactoring", "label": "Refactoring local", "description": "Amelioration du code existant (clean code local, lisibilite)" },
+      { "id": "documentation", "label": "Documentation", "description": "Commentaires et documentation du code" }
+    ],
+    "Superviseur": [
+      { "id": "technical", "label": "Revue technique", "description": "Controle des contributions (pull requests, design)" },
+      { "id": "quality", "label": "Investigation de bugs", "description": "Analyse de cause racine sur incidents complexes" },
+      { "id": "refactoring", "label": "Dette technique", "description": "Strategies de refactoring a moyenne echelle" },
+      { "id": "performance", "label": "Performance & observabilite", "description": "Profilage, optimisation des temps de reponse" },
+      { "id": "security", "label": "Revue de securite", "description": "Analyse de vulnerabilites et correctifs" }
+    ],
+    "Responsable": [
+      { "id": "management", "label": "Cadrage", "description": "Pilotage des specifications" },
+      { "id": "quality", "label": "Assurance qualite", "description": "Validation globale des livrables" },
+      { "id": "documentation", "label": "Communication", "description": "Notes de release et redditions" },
+      { "id": "architecture", "label": "Vision systeme", "description": "Evaluation d'impacts haut niveau" }
+    ],
+    "Architecte": [
+      { "id": "architecture", "label": "Conception & Design", "description": "Choix techniques, design patterns, modele de donnees" },
+      { "id": "refactoring", "label": "Dette technique structurelle", "description": "Refactoring a grande echelle (refonte de modules, migrations)" },
+      { "id": "security", "label": "Securite by design", "description": "Audit d'architecture et threat modeling" },
+      { "id": "documentation", "label": "ADR & Referentiel", "description": "Tracer les decisions d'architecture" }
+    ],
+    "Developpeur": [
+      { "id": "technical", "label": "Generation de code", "description": "Creation, explication, algorithmes" },
+      { "id": "refactoring", "label": "Clean code local", "description": "Refactoring incremental et qualite locale" },
+      { "id": "quality", "label": "Tests & TDD", "description": "Creation de tests unitaires et d'integration" },
+      { "id": "documentation", "label": "JSDoc & README", "description": "Documenter implementations et API" }
+    ],
+    "TesteurQA": [
+      { "id": "quality", "label": "Strategie de test", "description": "Plans de recette, scenarios exhaustifs" },
+      { "id": "technical", "label": "Tests automatises", "description": "Scripts E2E, assertions d'API" },
+      { "id": "documentation", "label": "Rapports de bugs", "description": "Formatage clair de tickets d'anomalies" },
+      { "id": "management", "label": "Metriques qualite", "description": "Suivi et synthese pour la direction" }
+    ],
+    "DevOps": [
+      { "id": "devops", "label": "Pipelines CI/CD", "description": "Infrastructure et workflows de deploiement" },
+      { "id": "security", "label": "SecOps", "description": "Hardening et securisation des deploiements" },
+      { "id": "performance", "label": "Optimisation perf cloud", "description": "Monitorer, profiler et optimiser les ressources cloud" },
+      { "id": "technical", "label": "Scripts d'automatisation", "description": "Bash, Python, IaC (Terraform/Ansible)" }
+    ],
+    "ChefProjet": [
+      { "id": "management", "label": "Planning & Cadrage", "description": "Coordination, tickets, deblocage" },
+      { "id": "quality", "label": "Recette", "description": "Verification fonctionnelle avant livraison" },
+      { "id": "documentation", "label": "Bilans & Comptes-rendus", "description": "Redaction des CR de sprints" }
+    ],
+    "ProductOwner": [
+      { "id": "management", "label": "Backlog & User Stories", "description": "Structuration BDD/Gherkin, epics" },
+      { "id": "quality", "label": "Criteres d'acceptation", "description": "Definition du 'Done' metier" },
+      { "id": "documentation", "label": "Release notes", "description": "Communication utilisateur orientee valeur" }
+    ]
+  }
+}

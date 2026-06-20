@@ -132,7 +132,8 @@ export class ContextAnalyzer implements IContextAnalyzer {
    * Retourne le CWD : surcharge utilisateur si définie, sinon safeCwd().
    */
   private getCwd(): string {
-    return this._workFolderOverride ?? safeCwd();
+    // Chaîne vide = pas d'override → retour au safeCwd()
+    return this._workFolderOverride || safeCwd();
   }
 
   /**
@@ -984,10 +985,11 @@ export class ContextAnalyzer implements IContextAnalyzer {
   }
 
   private getFallbackContext(): ProjectContext {
+    const cwd = this.getCwd();
     return {
       workFolder: {
-        path: this.getCwd(),
-        name: basenamePath(this.getCwd()),
+        path: cwd,
+        name: basenamePath(cwd),
         type: 'folder',
         technologies: [],
         lastModified: new Date(),

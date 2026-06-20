@@ -17,9 +17,17 @@ interface PromptPreferences {
 withDefaults(
   defineProps<{
     identityType?: 'User' | 'Superviseur' | 'Responsable';
+    /**
+     * Mode "bare" : ne rend PAS le wrapper `.card` ni le header interne de la section.
+     * Utile quand le composant est inclus dans une carte parente (accordion/collapse)
+     * qui fournit déjà son propre header + styling, pour éviter les cartes imbriquées
+     * et les titres dupliqués.
+     */
+    bare?: boolean;
   }>(),
   {
     identityType: 'User',
+    bare: false,
   },
 );
 
@@ -69,11 +77,11 @@ async function save() {
 </script>
 
 <template>
-  <div class="card">
-    <div class="card-header">
+  <div :class="bare ? '' : 'card'">
+    <div v-if="!bare" class="card-header">
       <h2 class="text-xs font-semibold text-gray-80">Personnalisation du prompt</h2>
     </div>
-    <div class="card-body space-y-3">
+    <div :class="bare ? 'space-y-3' : 'card-body space-y-3'">
       <!-- Langue -->
       <div>
         <label class="text-[11px] font-medium text-gray-60 block mb-0.5">Langue</label>

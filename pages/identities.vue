@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { usePromptSystem, createDefaultIdentity } from '~/composables/usePromptSystem';
 import type { UserIdentity, IdentityProfile } from '~/src/models/identity';
+import { IDENTITY_CATEGORIES, resolveRuntimeProfile, findIdentity } from '~/src/config/identities';
 
 const { identityResolver } = usePromptSystem();
 
-const selectedType = ref<'User' | 'Superviseur' | 'Responsable'>('User');
+// selectedIdentityId est un id large (string) issu de la configuration enrichie
+// enrichi (Architecte, Developpeur, ChefProjet, etc.). Le profil runtime
+// derivé via resolveRuntimeProfile() reste étroit (UserIdentityType) pour
+// les appels IdentityResolver / createDefaultIdentity.
+const selectedIdentityId = ref<string>('User');
+const currentRuntimeProfile = computed(() => resolveRuntimeProfile(selectedIdentityId.value));
+const currentLabel = computed(() => findIdentity(selectedIdentityId.value)?.label ?? selectedIdentityId.value);
+
 const identity = ref<UserIdentity | null>(null);
 const profile = ref<IdentityProfile | null>(null);
 const capabilities = ref<string[]>([]);
@@ -12,19 +20,19 @@ const permissionCheck = reactive<Record<string, boolean>>({});
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-const types: Array<'User' | 'Superviseur' | 'Responsable'> = ['User', 'Superviseur', 'Responsable'];
 const testActions = ['read', 'use_template', 'optimize', 'review', 'validate', 'rollback', 'delete'];
 
-async function loadIdentity(type: 'User' | 'Superviseur' | 'Responsable') {
+async function loadIdentity(id: string) {
   loading.value = true;
   error.value = null;
   try {
-    selectedType.value = type;
-    const newIdentity = createDefaultIdentity(type);
+    selectedIdentityId.value = id;
+    const runtimeType = resolveRuntimeProfile(id);
+    const newIdentity = createDefaultIdentity(runtimeType);
     await identityResolver.setCurrentIdentity(newIdentity);
     identity.value = newIdentity;
     profile.value = await identityResolver.getIdentityCharacteristics(newIdentity);
-    capabilities.value = await identityResolver.getIdentityCapabilities(type);
+    capabilities.value = await identityResolver.getIdentityCapabilities(runtimeType);
     for (const action of testActions) {
       permissionCheck[action] = await identityResolver.validateIdentityPermissions(newIdentity, action);
     }
@@ -45,24 +53,41 @@ onMounted(() => loadIdentity('User'));
       <p class="text-xs text-gray-50 mt-0.5">Sélectionne une identité et visualise ses capacités et permissions.</p>
     </div>
 
-    <div class="flex gap-1.5 mb-4">
-      <button
-        v-for="t in types"
-        :key="t"
-        class="text-xs font-medium px-3 py-1.5 rounded transition-colors"
-        :class="
-          selectedType === t ? 'bg-ibm-60 text-white' : 'bg-white border border-gray-30 text-gray-60 hover:bg-gray-10'
-        "
-        @click="loadIdentity(t)"
-      >
-        {{ t }}
-      </button>
+    <!-- Sélecteur groupé par catégorie (M3 enrichi) -->
+    <div class="space-y-2.5 mb-4">
+      <div v-for="cat in IDENTITY_CATEGORIES" :key="cat.id">
+        <p class="text-[10px] text-gray-40 uppercase tracking-wider font-semibold mb-1">
+          {{ cat.label }}
+        </p>
+        <div class="flex flex-wrap gap-1.5">
+          <button
+            v-for="opt in cat.identities"
+            :key="opt.id"
+            class="text-xs font-medium px-3 py-1.5 rounded transition-colors"
+            :class="
+              selectedIdentityId === opt.id
+                ? 'bg-ibm-60 text-white'
+                : 'bg-white border border-gray-30 text-gray-60 hover:bg-gray-10'
+            "
+            :title="opt.description"
+            @click="loadIdentity(opt.id)"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <div v-if="error" class="bg-red-50 border border-red-100 text-red-700 px-3 py-2 rounded text-xs mb-4">
       {{ error }}
     </div>
     <div v-if="loading" class="text-xs text-gray-50 py-4">Chargement…</div>
+
+    <p v-if="!loading && identity" class="text-[11px] text-gray-50 mb-3">
+      Profil runtime : <strong class="text-gray-80">{{ currentRuntimeProfile }}</strong> (affiché :
+      <strong class="text-gray-80">{{ currentLabel }}</strong
+      >)
+    </p>
 
     <div v-else-if="identity" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
       <!-- Profil -->

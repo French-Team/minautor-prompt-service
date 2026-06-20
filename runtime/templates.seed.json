@@ -1,0 +1,745 @@
+{
+  "templates": {
+    "tpl-code-review": {
+      "id": "tpl-code-review",
+      "name": "Revue de code",
+      "description": "Genere une revue de code structuree ciblant la qualite, la securite et la performance.",
+      "category": "technical",
+      "identities": ["Responsable", "Superviseur", "User"],
+      "template": "En tant que {{role}}, effectue une revue de code du fichier {{file}}. Concentre-toi sur : {{focus}}. Sois precis, cite les numeros de ligne et propose des correctifs concrets.",
+      "variables": [
+        { "name": "role", "type": "string", "required": true, "description": "Role du reviewer (ex: developpeur senior, architecte)" },
+        { "name": "file", "type": "string", "required": true, "description": "Chemin du fichier a reviewer" },
+        { "name": "focus", "type": "string", "required": false, "defaultValue": "qualite", "description": "Focus de la revue (qualite, securite, performance, lisibilite)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T08:00:00.000Z",
+      "updatedAt": "2026-06-20T08:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-bug-investigation": {
+      "id": "tpl-bug-investigation",
+      "name": "Investigation de bug",
+      "description": "Aide a diagnostiquer un bug en analysant symptomes, contexte RCA et correctifs.",
+      "category": "quality",
+      "identities": ["Responsable", "Superviseur"],
+      "template": "Un bug a ete signale : {{symptom}}. Le contexte technique est : {{context}}. Mene l'investigation, propose une analyse de cause racine et liste des correctifs possibles.",
+      "variables": [
+        { "name": "symptom", "type": "string", "required": true, "description": "Symptome observe (message d'erreur, comportement, etc.)" },
+        { "name": "context", "type": "string", "required": true, "description": "Contexte technique (fichier, version, environnement)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T08:00:00.000Z",
+      "updatedAt": "2026-06-20T08:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-spec-writing": {
+      "id": "tpl-spec-writing",
+      "name": "Redaction de spec",
+      "description": "Structure une specification fonctionnelle ou technique claire et actionnable.",
+      "category": "management",
+      "identities": ["ChefProjet", "ProductOwner", "Responsable", "TesteurQA"],
+      "template": "Redige une spec pour la fonctionnalite : {{feature}}. Cible : {{audience}}. Inclus : contexte, objectifs, perimetre, scenarios, criteres d'acceptation et risques.",
+      "variables": [
+        { "name": "feature", "type": "string", "required": true, "description": "Nom ou description courte de la fonctionnalite" },
+        { "name": "audience", "type": "string", "required": false, "defaultValue": "equipe dev", "description": "Public cible (dev, produit, direction)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T08:00:00.000Z",
+      "updatedAt": "2026-06-20T08:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-quick-refactor": {
+      "id": "tpl-quick-refactor",
+      "name": "Refactor rapide",
+      "description": "Propose un refactor incremental d'un module en respectant le style existant.",
+      "category": "refactoring",
+      "identities": ["Superviseur", "User"],
+      "template": "Refactorise le fichier {{file}} en ciblant : {{goal}}. Conserve la compatibilite ascendante. Liste les changements proposes avant d'appliquer.",
+      "variables": [
+        { "name": "file", "type": "string", "required": true, "description": "Chemin du fichier a refactoriser" },
+        { "name": "goal", "type": "string", "required": true, "description": "Objectif du refactor (lisibilite, perf, testabilite)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T08:00:00.000Z",
+      "updatedAt": "2026-06-20T08:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-architecture-design": {
+      "id": "tpl-architecture-design",
+      "name": "Design d'architecture",
+      "description": "Structure la conception technique d'une fonctionnalite ou d'un systeme (vue d'ensemble, composants, choix techniques).",
+      "category": "architecture",
+      "identities": ["Architecte", "Responsable"],
+      "template": "Concois l'architecture pour : {{feature}}. Contraintes : {{constraints}}. Stack privilegiee : {{stack}}. Inclus : vue d'ensemble, composants, flux de donnees, choix techniques justifies et trade-offs.",
+      "variables": [
+        { "name": "feature", "type": "string", "required": true, "description": "Fonctionnalite ou systeme a concevoir" },
+        { "name": "constraints", "type": "string", "required": false, "defaultValue": "Aucune", "description": "Contraintes non-fonctionnelles (perf, scalabilite, securite, cout)" },
+        { "name": "stack", "type": "string", "required": false, "defaultValue": "a choisir", "description": "Stack technique preferee ou a arbitrer" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T13:00:00.000Z",
+      "updatedAt": "2026-06-20T13:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-security-audit": {
+      "id": "tpl-security-audit",
+      "name": "Audit de securite",
+      "description": "Analyse ciblee des vulnerabilites d'un composant ou d'un flux, basee sur une methode de threat modeling.",
+      "category": "security",
+      "identities": ["Architecte", "DevOps", "Superviseur"],
+      "template": "Effectue un audit de securite du perimetre : {{scope}}. Applique la methode {{threat_model}}. Liste les vulnerabilites par severite, propose des correctifs concrets et reference OWASP/CWE.",
+      "variables": [
+        { "name": "scope", "type": "string", "required": true, "description": "Perimetre de l'audit (module, endpoint, flux, infrastructure)" },
+        { "name": "threat_model", "type": "string", "required": false, "defaultValue": "STRIDE", "description": "Methode de threat modeling (STRIDE, PASTA, OWASP Top 10)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T13:00:00.000Z",
+      "updatedAt": "2026-06-20T13:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-doc-generation": {
+      "id": "tpl-doc-generation",
+      "name": "Generation de documentation",
+      "description": "Produit une documentation technique ou utilisateur structuree (README, ADR, JSDoc, release notes).",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Redige la documentation pour : {{subject}}. Public cible : {{audience}}. Format : {{format}}. Structure : vue d'ensemble, pre-requis, exemples d'usage et points d'attention.",
+      "variables": [
+        { "name": "subject", "type": "string", "required": true, "description": "Sujet ou perimetre de la documentation" },
+        { "name": "audience", "type": "string", "required": false, "defaultValue": "equipe dev", "description": "Public cible (dev, produit, utilisateurs, direction)" },
+        { "name": "format", "type": "string", "required": false, "defaultValue": "markdown", "description": "Format de sortie (markdown, JSDoc, ADR, plain text)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T13:00:00.000Z",
+      "updatedAt": "2026-06-20T13:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-ci-pipeline": {
+      "id": "tpl-ci-pipeline",
+      "name": "Pipeline CI/CD",
+      "description": "Definit ou audite un pipeline d'integration et deploiement continu (build, test, lint, securite, deploiement).",
+      "category": "devops",
+      "identities": ["DevOps"],
+      "template": "Concois le pipeline CI/CD pour le projet {{project}}, ciblant les environnements {{targets}}. Outillage : {{tooling}}. Inclus : etapes (build, test, lint, securite, deploiement), criteres de gating et mecanismes de rollback.",
+      "variables": [
+        { "name": "project", "type": "string", "required": true, "description": "Nom ou type du projet (web app, API, microservice, mobile)" },
+        { "name": "targets", "type": "string", "required": true, "description": "Environnements cibles (staging, prod, multi-cloud)" },
+        { "name": "tooling", "type": "string", "required": false, "defaultValue": "GitHub Actions", "description": "Outillage CI/CD (GitHub Actions, GitLab CI, Jenkins, CircleCI)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T13:00:00.000Z",
+      "updatedAt": "2026-06-20T13:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-db-profiling": {
+      "id": "tpl-db-profiling",
+      "name": "Profilage de requetes DB",
+      "description": "Diagnostique les requetes lentes d'une base de donnees, identifie les goulets d'etranglement et propose des optimisations d'index/schema/plan d'execution.",
+      "category": "performance",
+      "identities": ["DevOps", "Superviseur"],
+      "template": "Analyse la requete SQL suivante : {{query}}. Base : {{database}}. SLA cible : {{target_latency}}. Inclus : plan d'execution, indexes candidats, statistiques de cardinalite, et corrections SQL concretes.",
+      "variables": [
+        { "name": "query", "type": "string", "required": true, "description": "Requete SQL a analyser" },
+        { "name": "database", "type": "string", "required": false, "defaultValue": "PostgreSQL 15", "description": "Moteur SQL et version (PostgreSQL/MySQL/MariaDB/SQLite)" },
+        { "name": "target_latency", "type": "string", "required": false, "defaultValue": "100ms", "description": "Latence cible (ex: 100ms p95, 50ms p99)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T14:00:00.000Z",
+      "updatedAt": "2026-06-20T14:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-code-generate": {
+      "id": "tpl-code-generate",
+      "name": "Generation de code",
+      "description": "Genere un extrait de code (fonction, classe, module) a partir d'une specification concise, en respectant le style du projet.",
+      "category": "technical",
+      "identities": ["Developpeur", "DevOps", "Superviseur", "TesteurQA", "User"],
+      "template": "Genere du code en {{language}} pour la specification : {{spec}}. Respecte le style : {{style}}. Inclus : signature, corps, gestion d'erreurs, et un test unitaire d'exemple.",
+      "variables": [
+        { "name": "language", "type": "string", "required": true, "description": "Langage cible (TypeScript / Python / Go / ...)" },
+        { "name": "spec", "type": "string", "required": true, "description": "Specification fonctionnelle du code a produire" },
+        { "name": "style", "type": "string", "required": false, "defaultValue": "conventions projet", "description": "Style de code a respecter (conventions projet, fonctionnel, etc.)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-code-explain": {
+      "id": "tpl-code-explain",
+      "name": "Explication de code",
+      "description": "Explique un extrait de code en francais clair avec sections (but, flux, complexite, points d'attention).",
+      "category": "technical",
+      "identities": ["Developpeur", "DevOps", "Superviseur", "TesteurQA", "User"],
+      "template": "Explique le code suivant : {{code}}. Niveau d'audience : {{audience_level}}. Structure : (1) objectif, (2) flux d'execution, (3) complexite et points d'attention, (4) exemples d'usage.",
+      "variables": [
+        { "name": "code", "type": "string", "required": true, "description": "Extrait de code a expliquer" },
+        { "name": "audience_level", "type": "string", "required": false, "defaultValue": "intermediaire", "description": "Niveau d'audience (debutant / intermediaire / expert)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-test-generate": {
+      "id": "tpl-test-generate",
+      "name": "Generation de tests unitaires",
+      "description": "Squelette de tests unitaires (table-driven, mocks, edge cases) pour une fonction/classe, adapte au framework de test.",
+      "category": "quality",
+      "identities": ["Superviseur", "User"],
+      "template": "Genere une suite de tests unitaires en style table-driven pour : {{code}}. Framework : {{framework}}. Couverture cible : {{coverage_target}}. Inclus : cas nominaux, edge cases (null, vide, limites), mocks de dependances, et assertions lisibles.",
+      "variables": [
+        { "name": "code", "type": "string", "required": true, "description": "Code source a tester (methode ou classe)" },
+        { "name": "framework", "type": "string", "required": true, "description": "Framework de test (vitest / jest / pytest / ...)" },
+        { "name": "coverage_target", "type": "string", "required": false, "defaultValue": "80%", "description": "Objectif de couverture (ex: 80%)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-test-strategy": {
+      "id": "tpl-test-strategy",
+      "name": "Plan de test exhaustif",
+      "description": "Plan de test complet (strategie, types de tests, matrice de couverture, criteres d'entree/sortie).",
+      "category": "quality",
+      "identities": ["Responsable", "Superviseur"],
+      "template": "Definis le plan de test pour : {{feature}}. Niveau de risque : {{risk_level}}. Timeline : {{timeline}}. Inclus : strategie (unitaire / integration / E2E / manuel), outils, matrice de couverture, criteres d'entree/sortie, gestion des defauts.",
+      "variables": [
+        { "name": "feature", "type": "string", "required": true, "description": "Fonctionnalite ou composant a tester" },
+        { "name": "risk_level", "type": "string", "required": false, "defaultValue": "medium", "description": "Niveau de risque (low / medium / high / critical)" },
+        { "name": "timeline", "type": "string", "required": true, "description": "Timeline de test (ex: 1 sprint, 2 semaines)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-test-script": {
+      "id": "tpl-test-script",
+      "name": "Script de test automatise",
+      "description": "Ecrit un script de test automatise (Playwright, Postman, supertest) a partir d'un scenario Gherkin/BDD.",
+      "category": "technical",
+      "identities": ["Responsable", "Superviseur"],
+      "template": "Redige un script de test en {{framework}} pour le scenario : {{scenario}}. Cible : {{target}}. Inclus : setup, execution, assertions explicites, teardown, et reporting d'echec lisible.",
+      "variables": [
+        { "name": "framework", "type": "string", "required": true, "description": "Framework de test (Playwright / Postman / supertest / ...)" },
+        { "name": "scenario", "type": "string", "required": true, "description": "Scenario Gherkin/BDD a automatiser" },
+        { "name": "target", "type": "string", "required": true, "description": "URL ou endpoint cible" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-method-extract": {
+      "id": "tpl-method-extract",
+      "name": "Extraction de methode",
+      "description": "Refactoring cible sur une methode (extract / inline / rename) avec motivations et tests de non-regression.",
+      "category": "refactoring",
+      "identities": ["Superviseur", "User"],
+      "template": "Refactore le bloc : {{code_block}}. Objectif : {{refactoring_goal}}. Contraintes : {{constraints}}. Livre : (1) motivation, (2) version refactoree, (3) diff conceptuel, (4) tests de non-regression a ajouter.",
+      "variables": [
+        { "name": "code_block", "type": "string", "required": true, "description": "Bloc de code a retravailler" },
+        { "name": "refactoring_goal", "type": "string", "required": true, "description": "Objectif du refactoring (extract method, inline, rename, ...)" },
+        { "name": "constraints", "type": "string", "required": false, "defaultValue": "conserver l'API publique", "description": "Contraintes a respecter" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T15:00:00.000Z",
+      "updatedAt": "2026-06-20T15:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-user-story": {
+      "id": "tpl-user-story",
+      "name": "User Story Gherkin",
+      "description": "Formate une User Story BDD avec epics, scenarios Given-When-Then et dependances.",
+      "category": "management",
+      "identities": ["ChefProjet", "ProductOwner", "Responsable", "TesteurQA"],
+      "template": "Redige une User Story pour : en tant que {{actor}}, je veux {{feature}} afin de {{benefit}}. Inclus : 3 scenarios Gherkin (nominal, erreur, bord), dependances, et Definition of Ready (DoR) avec criteres 'investigation pret'.",
+      "variables": [
+        { "name": "actor", "type": "string", "required": true, "description": "Persona (ex: developpeur junior, client enterprise)" },
+        { "name": "feature", "type": "string", "required": true, "description": "Fonctionnalite souhaitee par l'acteur" },
+        { "name": "benefit", "type": "string", "required": true, "description": "Benefice metier recherche (valeur, gain de temps, etc.)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-acceptance-criteria": {
+      "id": "tpl-acceptance-criteria",
+      "name": "Criteres d'acceptation",
+      "description": "Definit les criteres d'acceptation Given/When/Then mesurables et testables pour une User Story.",
+      "category": "quality",
+      "identities": ["ChefProjet", "Developpeur", "ProductOwner", "Responsable", "Superviseur", "TesteurQA"],
+      "template": "Redige les criteres d'acceptation pour la story {{story_id}}, ciblant : {{criteria_focus}}. Priorite : {{priority}}. Format : Given/When/Then mesurables. Inclus : cas nominaux, cas d'erreur, SLA et definition of done.",
+      "variables": [
+        { "name": "story_id", "type": "string", "required": true, "description": "Identifiant US (ex: US-42)" },
+        { "name": "criteria_focus", "type": "string", "required": true, "description": "Perimetre des criteres (fonctionnel, perf, UX, securite)" },
+        { "name": "priority", "type": "string", "required": false, "defaultValue": "Must", "description": "Priorite (Must / Should / Could / Won't)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-release-notes": {
+      "id": "tpl-release-notes",
+      "name": "Release notes",
+      "description": "Notes de release orientees utilisateur (Highlights, Changes, Breaking, Fixes, Known Issues).",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Redige les release notes pour la version {{version}}. Cible : {{audience}}. Ton : {{tone}}. Structure : Highlights (3 max), Changes (feature/enhancement), Breaking (migration), Fixes, Known Issues, et CTA vers la doc.",
+      "variables": [
+        { "name": "version", "type": "string", "required": true, "description": "Numero de version (ex: 2.1.0)" },
+        { "name": "audience", "type": "string", "required": false, "defaultValue": "utilisateurs finaux", "description": "Public cible (utilisateurs finaux, dev, ops, direction)" },
+        { "name": "tone", "type": "string", "required": false, "defaultValue": "accessible non-technique", "description": "Ton souhaite (accessible non-technique, technique, marketing)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-qa-metrics": {
+      "id": "tpl-qa-metrics",
+      "name": "Synthese metriques qualite",
+      "description": "Synthese executive des metriques qualite pour la direction (taux de defaut, couverture, MTTR, escapes en prod).",
+      "category": "management",
+      "identities": ["ChefProjet", "ProductOwner", "Responsable", "TesteurQA"],
+      "template": "Produis la synthese metriques qualite pour la periode {{period}}. Perimetre : {{scope}}. Cible : {{audience}}. Inclus : KPI (taux de defaut, couverture de test, MTTR, escapes en prod), tendances, alertes, recommandations.",
+      "variables": [
+        { "name": "period", "type": "string", "required": true, "description": "Periode analysee (ex: sprint 14 ou 2026-Q2)" },
+        { "name": "scope", "type": "string", "required": true, "description": "Perimetre produit/projet (ex: API paiement, app mobile)" },
+        { "name": "audience", "type": "string", "required": false, "defaultValue": "Direction", "description": "Cible de la synthese (Direction, Responsable, equipe QA)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-recipe-recette": {
+      "id": "tpl-recipe-recette",
+      "name": "Recette fonctionnelle",
+      "description": "Plan de recette manuel pas-a-pas (action, attendu, observe, OK/KO) pour validation avant livraison.",
+      "category": "quality",
+      "identities": ["ChefProjet", "Developpeur", "ProductOwner", "Responsable", "Superviseur", "TesteurQA"],
+      "template": "Redige le plan de recette pour : {{feature}}. Environnement : {{env}}. Etapes a executer : {{steps}}. Format par etape : action, attendu, observe, OK/KO. Inclus : scenarios de regression et criteres de sortie.",
+      "variables": [
+        { "name": "feature", "type": "string", "required": true, "description": "Fonctionnalite a recetter" },
+        { "name": "env", "type": "string", "required": true, "description": "Environnement de test (staging / preprod / prod)" },
+        { "name": "steps", "type": "string", "required": true, "description": "Liste des etapes utilisateurs a executer" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-validation-checklist": {
+      "id": "tpl-validation-checklist",
+      "name": "Checklist de validation",
+      "description": "Checklist binaire pour validation fonctionnelle avant release (OK / KO / N/A par critere).",
+      "category": "quality",
+      "identities": ["ChefProjet", "Developpeur", "ProductOwner", "Responsable", "Superviseur", "TesteurQA"],
+      "template": "Definis la checklist de validation pour le livrable {{deliverable}}. Criteres a verifier : {{criteria}}. Sign-off requis : {{signoff_required}}. Format : OK / KO / N/A par critere, commentaires, Conclusion pass/fail.",
+      "variables": [
+        { "name": "deliverable", "type": "string", "required": true, "description": "Livrable a valider (feature, sprint, release)" },
+        { "name": "criteria", "type": "string", "required": true, "description": "Liste des criteres a verifier" },
+        { "name": "signoff_required", "type": "string", "required": false, "defaultValue": "Responsable", "description": "Profil requis pour le sign-off (Responsable, ChefProjet, QA)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-release-readiness": {
+      "id": "tpl-release-readiness",
+      "name": "Go/No-Go release",
+      "description": "Decision Go/No-Go pour une release avec scorecard, mitigation des risques et recommandation argumentee.",
+      "category": "management",
+      "identities": ["ChefProjet", "ProductOwner", "Responsable", "TesteurQA"],
+      "template": "Prepare la decision Go/No-Go pour la release {{version}}. Criteres satisfaits : {{criteria_met}}. Risques residuels : {{residual_risks}}. Inclus : scorecard (OK / KO par critere), mitigation des risques, recommandation argumentee.",
+      "variables": [
+        { "name": "version", "type": "string", "required": true, "description": "Version de la release (ex: 2.1.0)" },
+        { "name": "criteria_met", "type": "string", "required": true, "description": "Liste des criteres de sortie satisfaits (test pass, docs OK, sign-off OK)" },
+        { "name": "residual_risks", "type": "string", "required": true, "description": "Risques acceptes ou non resolus, avec mitigation envisagee" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T16:00:00.000Z",
+      "updatedAt": "2026-06-20T16:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-decision-record": {
+      "id": "tpl-decision-record",
+      "name": "Architecture Decision Record",
+      "description": "Genere un ADR au format MADR avec contexte, options, decision et consequences.",
+      "category": "architecture",
+      "identities": ["Architecte", "Responsable"],
+      "template": "Redige un ADR au format MADR pour : {{title}}. Statut : {{status}}. Contexte : {{context}}. Choix retenu : {{decision}}. Inclus : options considerees, consequences positives/negatives, et references croisees.",
+      "variables": [
+        { "name": "title", "type": "string", "required": true, "description": "Titre court de la decision (ex: 'Adoption de PostgreSQL comme DB primaire')" },
+        { "name": "status", "type": "string", "required": false, "defaultValue": "proposed", "description": "Statut MADR (proposed / accepted / deprecated / superseded)" },
+        { "name": "context", "type": "string", "required": true, "description": "Contexte et forces en presence (probleme, contraintes, drivers)" },
+        { "name": "decision", "type": "string", "required": true, "description": "Decision prise / proposee (orientation, choix technique)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-microservice-split": {
+      "id": "tpl-microservice-split",
+      "name": "Decoupage microservices",
+      "description": "Identifie les bounded contexts et propose un decoupage en services/modules autonomes.",
+      "category": "architecture",
+      "identities": ["Architecte", "Responsable"],
+      "template": "Propose le decoupage en services/modules pour : {{current_monolith}}. Drivers : {{drivers}}. Contraintes : {{constraints}}. Inclus : (1) bounded contexts candidats, (2) contrats d'interface (API/events), (3) data ownership, (4) impacts organisationnels et migration incrementale.",
+      "variables": [
+        { "name": "current_monolith", "type": "string", "required": true, "description": "Description de l'existant (modules, dependances, points chauds)" },
+        { "name": "drivers", "type": "string", "required": true, "description": "Motivations du decoupage (scalabilite, equipes, deploiements, dette)" },
+        { "name": "constraints", "type": "string", "required": false, "defaultValue": "equipes co-localisees", "description": "Contraintes (localisation equipes, conformite, latence)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-large-refactor": {
+      "id": "tpl-large-refactor",
+      "name": "Refactoring structurel a grande echelle",
+      "description": "Plan de refactoring structurel (decomposition de module, migration API, dette accumulee) avec go/no-go incrementaux.",
+      "category": "refactoring",
+      "identities": ["Architecte", "Developpeur", "Superviseur", "User"],
+      "template": "Plan de refactoring structurel pour : {{scope}}. Motivation : {{motivation}}. Tolerance au risque : {{risk_tolerance}}. Inclus : (1) analyse de l'existant, (2) strategie incrementale (etapes avec go/no-go), (3) tests de regression, (4) criteres de succes mesurables.",
+      "variables": [
+        { "name": "scope", "type": "string", "required": true, "description": "Perimetre du refactoring (module, sous-systeme, couche)" },
+        { "name": "motivation", "type": "string", "required": true, "description": "Motivation (dette technique, performance, modularite, scalabilite)" },
+        { "name": "risk_tolerance", "type": "string", "required": false, "defaultValue": "medium", "description": "Tolerance au risque (low / medium / high) — influe la granularite des etapes" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-threat-model": {
+      "id": "tpl-threat-model",
+      "name": "Threat modeling from scratch",
+      "description": "Threat model STRIDE d'un systeme avec acteurs, flux, trust boundaries, menaces et contre-mesures.",
+      "category": "security",
+      "identities": ["Architecte", "DevOps", "Superviseur"],
+      "template": "Produit le threat model pour : {{system}}. Sensibilite donnees : {{data_sensitivity}}. Methode : {{method}}. Inclus : diagramme de flux, trust boundaries, acteurs, menaces par categorie, scoring, et contre-mesures priorisees.",
+      "variables": [
+        { "name": "system", "type": "string", "required": true, "description": "Perimetre du systeme (composant, API, flux complet)" },
+        { "name": "data_sensitivity", "type": "string", "required": true, "description": "Sensibilite des donnees traitees (PII, financier, public, sante)" },
+        { "name": "method", "type": "string", "required": false, "defaultValue": "STRIDE", "description": "Methode de threat modeling (STRIDE, PASTA, VAST, OCTAVE)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-secure-code-review": {
+      "id": "tpl-secure-code-review",
+      "name": "Revue securite checklist OWASP",
+      "description": "Revue ciblee OWASP Top 10 et CWE avec detection de patterns vulnerables et correctifs.",
+      "category": "security",
+      "identities": ["Architecte", "DevOps", "Superviseur"],
+      "template": "Effectue une revue securite du code : {{code}}. Focus OWASP : {{owasp_focus}}. Langage : {{language}}. Inclus pour chaque risque : (1) pattern detecte (avec ligne), (2) severite CVSS, (3) correctif exemple, (4) reference CWE.",
+      "variables": [
+        { "name": "code", "type": "string", "required": true, "description": "Extrait de code a reviewer (perimetre de la revue)" },
+        { "name": "owasp_focus", "type": "string", "required": false, "defaultValue": "top10", "description": "Focus OWASP (top10, asvs niveau 1-3, sam)" },
+        { "name": "language", "type": "string", "required": true, "description": "Langage du code (TypeScript / Python / Java / Go / ...)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-jsdoc": {
+      "id": "tpl-jsdoc",
+      "name": "Documentation JSDoc",
+      "description": "Squelette JSDoc complet pour une methode/classe avec @param, @returns, @throws, @example.",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Genere la documentation JSDoc pour : {{code}}. Style : {{style}}. Exemples : {{include_examples}}. Inclus : @param types, @returns, @throws pour exceptions attendues, @example executable, et resume clair en premiere ligne.",
+      "variables": [
+        { "name": "code", "type": "string", "required": true, "description": "Methode ou classe a documenter" },
+        { "name": "style", "type": "string", "required": false, "defaultValue": "standard", "description": "Style JSDoc (standard / typedoc / custom)" },
+        { "name": "include_examples", "type": "string", "required": false, "defaultValue": "true", "description": "Inclure des @example (true / false)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T17:00:00.000Z",
+      "updatedAt": "2026-06-20T17:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-automation-script": {
+      "id": "tpl-automation-script",
+      "name": "Script d'automatisation Bash/Python",
+      "description": "Genere un script d'automatisation (Bash, Python, Makefile) avec gestion d'erreurs, logging et garde-fous.",
+      "category": "technical",
+      "identities": ["Developpeur", "DevOps", "Superviseur", "TesteurQA", "User"],
+      "template": "Ecris un script {{language}} qui : {{goal}}. Cible l'environnement : {{environment}}. Inclus : garde-fous de securite (set -e, validation d'entrees), logging structure, mode dry-run, et exemples d'invocation.",
+      "variables": [
+        { "name": "language", "type": "string", "required": true, "description": "Langage du script (bash / python / make)" },
+        { "name": "goal", "type": "string", "required": true, "description": "Ce que le script doit faire" },
+        { "name": "environment", "type": "string", "required": false, "defaultValue": "Linux standard", "description": "Environnement cible (Linux standard, macOS, Windows WSL)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-iac-script": {
+      "id": "tpl-iac-script",
+      "name": "Script Infrastructure-as-Code",
+      "description": "Module IaC (Terraform / Ansible / Pulumi) structure pour provisionner une ressource.",
+      "category": "devops",
+      "identities": ["DevOps"],
+      "template": "Redige un module IaC en {{tool}} pour provisionner : {{resource}}. Specifications : {{requirements}}. Inclus : variables typees, outputs documentes, etat remote, et un test d'exemple (ex : terraform plan / kitchen-ci).",
+      "variables": [
+        { "name": "tool", "type": "string", "required": true, "description": "Outil IaC (terraform / ansible / pulumi)" },
+        { "name": "resource", "type": "string", "required": true, "description": "Ressource cible (S3 bucket, EC2 instance, k8s deployment)" },
+        { "name": "requirements", "type": "string", "required": true, "description": "Specifications fonctionnelles et non-fonctionnelles" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-deploy-runbook": {
+      "id": "tpl-deploy-runbook",
+      "name": "Runbook de deploiement",
+      "description": "Runbook pas-a-pas pour deploiement (pre-flight, deploy, post-verifications, rollback).",
+      "category": "devops",
+      "identities": ["DevOps"],
+      "template": "Redige le runbook de deploiement pour : {{service}}. Environnement : {{environment}}. Strategie : {{strategy}}. Sections : (1) pre-flight checklist, (2) etapes de deploiement, (3) verifications post-deploiement (smoke tests, health checks), (4) procedure de rollback documentee.",
+      "variables": [
+        { "name": "service", "type": "string", "required": true, "description": "Service ou application a deployer" },
+        { "name": "environment", "type": "string", "required": true, "description": "Environnement cible (staging, preprod, prod)" },
+        { "name": "strategy", "type": "string", "required": true, "description": "Strategie (blue-green / canary / rolling)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-js-perf": {
+      "id": "tpl-js-perf",
+      "name": "Profilage frontend / JavaScript",
+      "description": "Diagnostic de performance JS/frontend (long tasks, re-renders, bundle size, Core Web Vitals).",
+      "category": "performance",
+      "identities": ["DevOps", "Superviseur"],
+      "template": "Diagnostique la performance de : {{target}}. Metrique cible : {{metric}}. Budget : {{budget}}. Inclus : (1) profilage (DevTools / Lighthouse / WebPageTest), (2) goulets d'etranglement identifies, (3) optimisations concretes (lazy-load, memo, splitting, prefetch), (4) tests de regression de perf.",
+      "variables": [
+        { "name": "target", "type": "string", "required": true, "description": "Page ou composant a profiler" },
+        { "name": "metric", "type": "string", "required": false, "defaultValue": "LCP", "description": "Metrique cible (LCP / FID / CLS / TTI / bundle-size)" },
+        { "name": "budget", "type": "string", "required": false, "defaultValue": "2s LCP", "description": "Budget de performance vise (ex: 2s LCP, 200KB JS)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-cloud-cost": {
+      "id": "tpl-cloud-cost",
+      "name": "Optimisation couts cloud",
+      "description": "Audit couts cloud (instances, storage, data transfer) avec plan d'optimisation priorise.",
+      "category": "performance",
+      "identities": ["DevOps", "Superviseur"],
+      "template": "Audite les couts cloud pour : provider {{provider}}, scope {{scope}}, periode {{period}}. Inclus : (1) top 5 contributeurs de cout, (2) ressources sous-utilisees (CPU/memoire <20 %), (3) opportunites de Reserved Instances / Savings Plans, (4) data transfer optimization, (5) plan d'action priorise avec gain estime.",
+      "variables": [
+        { "name": "provider", "type": "string", "required": true, "description": "Provider cloud (AWS / GCP / Azure)" },
+        { "name": "scope", "type": "string", "required": true, "description": "Comptes ou services concernes par l'audit" },
+        { "name": "period", "type": "string", "required": true, "description": "Periode analysee (ex: 2026-Q2, dernier mois)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-bug-report": {
+      "id": "tpl-bug-report",
+      "name": "Rapport de bug structure",
+      "description": "Ticket de bug structure (repro, environnement, expected vs actual, logs, severite).",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Redige le rapport de bug : {{title}}. Severite : {{severity}}. Repro : {{repro_steps}}. Environnement : {{environment}}. Inclus : expected vs actual, logs pertinents, screenshots, et impact utilisateur.",
+      "variables": [
+        { "name": "title", "type": "string", "required": true, "description": "Titre court du bug" },
+        { "name": "severity", "type": "string", "required": false, "defaultValue": "medium", "description": "Severite (low / medium / high / blocker)" },
+        { "name": "repro_steps", "type": "string", "required": true, "description": "Etapes de reproduction detaillees" },
+        { "name": "environment", "type": "string", "required": true, "description": "Environnement (navigateur, OS, version, build)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-cr-sprint": {
+      "id": "tpl-cr-sprint",
+      "name": "Compte-rendu de sprint",
+      "description": "CR de sprint avec sections Done / In progress / Blockers / Metriques / Decisions / Plan suivant.",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Redige le compte-rendu du sprint {{sprint_id}}. Livrables Done : {{deliverables_done}}. Blockers : {{blockers}}. Highlights : {{highlights}}. Structure : (1) resume executif, (2) Done / In progress / Carry-over, (3) metriques (velocite, qualite), (4) decisions prises, (5) plan du sprint suivant.",
+      "variables": [
+        { "name": "sprint_id", "type": "string", "required": true, "description": "Identifiant du sprint (ex: sprint 14 ou 2026-W25)" },
+        { "name": "deliverables_done", "type": "string", "required": true, "description": "Livrables termines pendant le sprint" },
+        { "name": "blockers", "type": "string", "required": true, "description": "Blockers rencontres (techniques, organisationnels, dependances externes)" },
+        { "name": "highlights", "type": "string", "required": false, "description": "Points saillants ou succes notables" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-changelog-entry": {
+      "id": "tpl-changelog-entry",
+      "name": "Entree de changelog",
+      "description": "Entree de changelog categorisee (Added/Changed/Fixed/Removed/Deprecated) suivant Keep a Changelog.",
+      "category": "documentation",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "ProductOwner", "Responsable", "TesteurQA", "User"],
+      "template": "Redige l'entree de changelog pour la version {{version}}. Changements : {{entries}}. Format : {{format}}. Categorise en Added / Changed / Fixed / Removed / Deprecated / Security. Inclus : liens vers issues et migration guides.",
+      "variables": [
+        { "name": "version", "type": "string", "required": true, "description": "Numero de version (ex: 2.1.0)" },
+        { "name": "entries", "type": "string", "required": true, "description": "Liste des changements de la release" },
+        { "name": "format", "type": "string", "required": false, "defaultValue": "keep-a-changelog", "description": "Format souhaite (keep-a-changelog, conventional-commits)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    },
+    "tpl-general-assist": {
+      "id": "tpl-general-assist",
+      "name": "Assistance generaliste",
+      "description": "Reponse polyvalente pour demandes hors-scope couvert par les piliers specialises (fallback universel).",
+      "category": "general",
+      "identities": ["Architecte", "ChefProjet", "Developpeur", "DevOps", "ProductOwner", "Responsable", "Superviseur", "TesteurQA", "User"],
+      "template": "En tant qu'assistant polyvalent, traite la demande suivante : {{task}}. Contexte additionnel : {{context}}. Structure ta reponse en : comprehension, etapes, livrables.",
+      "variables": [
+        { "name": "task", "type": "string", "required": true, "description": "Demande ou tache a traiter" },
+        { "name": "context", "type": "string", "required": false, "defaultValue": "", "description": "Contexte additionnel (projet, contraintes, exemples)" }
+      ],
+      "constraints": [],
+      "version": "1.0.0",
+      "isPublic": true,
+      "author": "system",
+      "createdAt": "2026-06-20T18:00:00.000Z",
+      "updatedAt": "2026-06-20T18:00:00.000Z",
+      "usageCount": 0
+    }
+  },
+  "metadata": {
+    "version": 5,
+    "lastUpdated": "2026-06-20T18:00:00.000Z"
+  }
+}

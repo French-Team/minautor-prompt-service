@@ -80,7 +80,8 @@ describe('TemplateValidator', () => {
       expect(result.isValid).toBe(false);
       expect(result.errors).toContainEqual({
         field: 'category',
-        message: 'Template category must be one of: general, technical, management, quality, optimization',
+        message:
+          'Template category must be one of: general, technical, architecture, refactoring, quality, security, documentation, devops, management, performance',
         code: 'INVALID_TEMPLATE_CATEGORY',
       });
     });

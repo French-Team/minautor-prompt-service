@@ -353,8 +353,26 @@ class StandardPromptGenerator extends PromptGenerationTemplate {
       case 'quality':
         capabilities.push('quality_validation', 'testing');
         break;
-      case 'optimization':
-        capabilities.push('performance_analysis', 'optimization_suggestions');
+      case 'refactoring':
+        capabilities.push('code_quality_improvement', 'clean_code_suggestions');
+        break;
+      case 'performance':
+        capabilities.push('performance_analysis', 'profiling_suggestions');
+        break;
+      case 'general':
+        capabilities.push('basic_analysis', 'general_purpose_response');
+        break;
+      case 'architecture':
+        capabilities.push('architecture_design', 'system_modeling');
+        break;
+      case 'security':
+        capabilities.push('security_audit', 'vulnerability_analysis');
+        break;
+      case 'documentation':
+        capabilities.push('technical_writing', 'knowledge_synthesis');
+        break;
+      case 'devops':
+        capabilities.push('pipeline_automation', 'infrastructure_scripting');
         break;
     }
 
