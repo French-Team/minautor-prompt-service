@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:clean": "npx kill-port 3000 || true; nuxt build",
+    "build:clean": "nuxt build",
     "build": "npm run build:clean",
     "dev": "nuxt dev",
     "dev:ssl": "nuxt dev --https",
