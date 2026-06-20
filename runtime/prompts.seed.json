@@ -1,0 +1,8 @@
+{
+  "prompts": {},
+  "metadata": {
+    "version": 1,
+    "lastUpdated": "2026-06-20T10:17:00.000Z",
+    "description": "Seed file for runtime/prompts.json — bootstraps an empty prompt store on first launch."
+  }
+}

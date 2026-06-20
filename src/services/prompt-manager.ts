@@ -108,6 +108,16 @@ export interface OptimizationInsights {
   potentialImprovements: string[];
 }
 
+// Options de configuration du PromptManager (ajouté en Mission 03 — persistance disque).
+export interface PromptManagerOptions {
+  /**
+   * Chemin du fichier JSON utilisé pour la persistance disque (ex: `runtime/prompts.json`).
+   * Si fourni, le service chargera/sauvera les prompts dans ce fichier à chaque mutation.
+   * Si absent (défaut), le service reste 100% en RAM (utile pour les tests unitaires).
+   */
+  storagePath?: string;
+}
+
 /**
  * Central orchestrator for comprehensive prompt management
  * Coordinates all prompt-related services and provides unified interface
@@ -117,6 +127,8 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
   private promptStore = new Map<string, GeneratedPrompt>();
   private promptCache = new Map<string, { prompt: GeneratedPrompt; timestamp: number }>();
   private readonly cacheTTL = 5 * 60 * 1000; // 5 minutes
+  private readonly storagePath: string | null = null;
+  private diskLoaded = false;
 
   constructor(
     private identityResolver: IIdentityResolver,
@@ -125,7 +137,10 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
     private promptGenerator: IPromptGenerator,
     private versionHandler: IVersionHandler,
     private agentAdapter: IAgentAdaptationInterface,
-  ) {}
+    options: PromptManagerOptions = {},
+  ) {
+    this.storagePath = options.storagePath ?? null;
+  }
 
   /**
    * Core prompt generation with full orchestration
@@ -229,6 +244,7 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
 
     // Step 5: Store prompt
     this.promptStore.set(generatedPrompt.id, generatedPrompt);
+    await this.persistSafely();
 
     return generatedPrompt;
   }
@@ -267,6 +283,7 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
     // Update store and clear cache
     this.promptStore.set(promptId, updatedPrompt);
     this.clearPromptCache(promptId);
+    await this.persistSafely();
 
     return updatedPrompt;
   }
@@ -365,6 +382,7 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
     // Remove from store and cache
     this.promptStore.delete(promptId);
     this.clearPromptCache(promptId);
+    await this.persistSafely();
 
     return true;
   }
@@ -384,6 +402,7 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
 
     this.promptStore.set(promptId, prompt);
     this.clearPromptCache(promptId);
+    await this.persistSafely();
 
     return true;
   }
@@ -403,8 +422,35 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
 
     this.promptStore.set(promptId, prompt);
     this.clearPromptCache(promptId);
+    await this.persistSafely();
 
     return prompt;
+  }
+
+  /**
+   * Stocke un prompt déjà généré (utilisé par l'API serveur pour persister un
+   * GeneratedPrompt venant du client sans relancer toute la chaîne d'orchestration).
+   * Insertion directe dans le store + saveToDisk, sans règles ni version.
+   */
+  async storePrompt(prompt: GeneratedPrompt): Promise<GeneratedPrompt> {
+    this.promptStore.set(prompt.id, prompt);
+    await this.persistSafely();
+    return prompt;
+  }
+
+  /**
+   * Liste tous les prompts du store in-memory (utilisé par le endpoint GET serveur).
+   * Retourne des clones superficiels — caller ne peut pas muter le store interne.
+   */
+  listPrompts(): GeneratedPrompt[] {
+    return Array.from(this.promptStore.values()).map((p) => ({ ...p }));
+  }
+
+  /**
+   * Indique si un prompt existe dans le store (utilisé par le POST pour 409 dup).
+   */
+  hasPrompt(promptId: string): boolean {
+    return this.promptStore.has(promptId);
   }
 
   /**
@@ -796,5 +842,131 @@ export class PromptManager implements IPromptManager, PromptLifecycleManager, Pr
     if (optimizedContent !== prompt.content) {
       await this.updatePrompt(prompt.id, { content: optimizedContent });
     }
+  }
+
+  // ─── Persistance disque (Mission 03) ───────────────────────────────────────
+
+  /**
+   * Initialise le service depuis le disque si un chemin de stockage est configuré.
+   * À appeler une seule fois (la classe se protège contre les doubles-chargements).
+   * En l'absence de `storagePath`, cette méthode est un no-op (mode RAM pur).
+   */
+  async initialize(): Promise<void> {
+    if (this.diskLoaded) return;
+    this.diskLoaded = true;
+    if (this.storagePath) {
+      await this.loadFromDisk();
+    }
+  }
+
+  /**
+   * Indique si la persistance disque est active (un `storagePath` a été fourni).
+   * Utile pour les logs/diagnostics et pour les tests d'intégration côté serveur.
+   */
+  isPersistenceEnabled(): boolean {
+    return this.storagePath !== null;
+  }
+
+  /**
+   * Lit le fichier de stockage, charge les prompts en mémoire et ravive les Dates.
+   * Si le fichier n'existe pas, crée un fichier initial à partir de `runtime/prompts.seed.json`
+   * (copié dans le fichier cible). Idempotent : peut être appelé plusieurs fois.
+   */
+  private async loadFromDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { existsSync, readFileSync, writeFileSync, mkdirSync } = await import('node:fs');
+    const { dirname } = await import('node:path');
+
+    const dir = dirname(this.storagePath);
+    if (dir && !existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
+    if (!existsSync(this.storagePath)) {
+      // Bootstrap : on copie le seed de référence s'il existe, sinon on initialise un store vide.
+      const seedPath = this.storagePath.replace(/prompts\.json$/, 'prompts.seed.json');
+      if (existsSync(seedPath)) {
+        const seedRaw = readFileSync(seedPath, 'utf-8');
+        writeFileSync(this.storagePath, seedRaw, 'utf-8');
+      } else {
+        writeFileSync(
+          this.storagePath,
+          JSON.stringify({ prompts: {}, metadata: { version: 1, lastUpdated: new Date().toISOString() } }),
+          'utf-8',
+        );
+      }
+    }
+
+    const raw = readFileSync(this.storagePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { prompts?: Record<string, GeneratedPrompt>; metadata?: unknown };
+
+    if (parsed.prompts && typeof parsed.prompts === 'object') {
+      for (const [id, rawPrompt] of Object.entries(parsed.prompts)) {
+        const revived = this.revivePromptDates(rawPrompt);
+        this.promptStore.set(id, revived);
+      }
+    }
+  }
+
+  /**
+   * Sérialise la Map courante vers le fichier de stockage.
+   * No-op si aucun `storagePath` n'a été configuré.
+   */
+  private async saveToDisk(): Promise<void> {
+    if (!this.storagePath) return;
+    const { writeFileSync } = await import('node:fs');
+
+    const payload = {
+      prompts: Object.fromEntries(this.promptStore),
+      metadata: {
+        version: 1,
+        lastUpdated: new Date().toISOString(),
+      },
+    };
+    writeFileSync(this.storagePath, JSON.stringify(payload, null, 2), 'utf-8');
+  }
+
+  /**
+   * Wrapper privé pour `saveToDisk()` qui log les erreurs sans throw.
+   * Permet d'isoler les hooks de mutation du bruit try/catch (5 fois dans la classe).
+   */
+  private async persistSafely(): Promise<void> {
+    try {
+      await this.saveToDisk();
+    } catch (diskError) {
+      console.error('[PromptManager] Failed to save prompts to disk:', diskError);
+    }
+  }
+
+  /**
+   * Reconstitue des objets `Date` à partir de chaînes ISO après désérialisation JSON.
+   * Traite `metadata.createdAt`, `metadata.updatedAt`, `metadata.usage.lastUsed` et
+   * `context.workFolder.lastModified`. Les autres Dates du ProjectContext ne sont
+   * pas ravivées (les flow / project state n'en ont pas — vérifié sur src/models/context.ts).
+   */
+  private revivePromptDates(raw: GeneratedPrompt): GeneratedPrompt {
+    const p: GeneratedPrompt = { ...raw };
+    if (p.metadata) {
+      if (typeof p.metadata.createdAt === 'string') {
+        p.metadata.createdAt = new Date(p.metadata.createdAt);
+      }
+      if (typeof p.metadata.updatedAt === 'string') {
+        p.metadata.updatedAt = new Date(p.metadata.updatedAt);
+      }
+      if (p.metadata.usage && typeof p.metadata.usage.lastUsed === 'string') {
+        p.metadata.usage.lastUsed = new Date(p.metadata.usage.lastUsed);
+      }
+    }
+    // Ravive spécifiquement `context.workFolder.lastModified` (seul Date en dehors de metadata).
+    if (
+      p.context?.workFolder &&
+      typeof (p.context.workFolder as { lastModified?: unknown }).lastModified === 'string'
+    ) {
+      const wf = p.context.workFolder as { lastModified: Date | string };
+      if (typeof wf.lastModified === 'string') {
+        wf.lastModified = new Date(wf.lastModified);
+      }
+    }
+    return p;
   }
 }
